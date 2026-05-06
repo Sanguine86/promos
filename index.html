@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#003a70">
+<meta name="description" content="Promos — Sabé siempre con qué pagar. El asistente inteligente de promos bancarias en Argentina.">
+<meta name="apple-mobile-web-app-title" content="Promos">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23003a70' width='100' height='100' rx='20'/><text x='50' y='68' text-anchor='middle' font-size='50' fill='white'>🏷️</text></svg>">
+<title>Promos</title>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#f5f7fa;--white:#fff;--card:#fff;
+--accent:#003a70;--accent2:#005baa;--accent3:#0073d1;--accent-light:#e8f1fc;--accent-lighter:#f0f6ff;
+--green:#1a8c4e;--green-bg:#e8f8ef;--green-border:#b8e6c8;
+--orange:#c07000;--orange-bg:#fff5e6;--orange-border:#ffd699;
+--red:#c02020;--red-bg:#fde8e8;
+--text:#1a2233;--text2:#5a6a80;--text3:#8899aa;
+--border:#e2e8f0;--border2:#d0d8e4;
+--shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+--shadow2:0 4px 12px rgba(0,0,0,.08);
+--r:12px;--rs:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:15px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fu{animation:fadeUp .35s ease both}
+.scr{display:none;padding:16px 16px 100px;max-width:500px;margin:0 auto}.scr.on{display:block}
+
+/* WELCOME */
+.welcome{text-align:center;padding:60px 24px 30px}
+.welcome .logo{width:72px;height:72px;border-radius:18px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.8em;color:#fff;box-shadow:var(--shadow2)}
+.welcome h1{font-size:2em;font-weight:800;color:var(--accent);letter-spacing:-.5px;margin-bottom:6px}
+.welcome p{color:var(--text2);font-size:.88em;max-width:300px;margin:0 auto;line-height:1.6}
+.welcome .tagline{font-size:.72em;color:var(--text3);margin-top:12px;font-style:italic}
+
+/* AUTH */
+.auth-box{background:var(--white);border-radius:var(--r);padding:20px;margin-top:20px;box-shadow:var(--shadow)}
+.auth-box h3{font-size:.95em;font-weight:700;color:var(--accent);margin-bottom:12px;text-align:center}
+.auth-toggle{display:flex;gap:0;margin-bottom:14px;border-radius:var(--rs);overflow:hidden;border:1.5px solid var(--border)}
+.auth-toggle button{flex:1;padding:9px;border:none;background:var(--white);font-size:.8em;font-weight:600;cursor:pointer;color:var(--text2);transition:.2s}
+.auth-toggle button.on{background:var(--accent);color:#fff}
+.auth-err{color:var(--red);font-size:.72em;margin-top:6px;min-height:16px}
+.auth-skip{text-align:center;margin-top:12px}
+.auth-skip a{font-size:.75em;color:var(--text3);cursor:pointer;text-decoration:underline}
+.divider{display:flex;align-items:center;gap:10px;margin:14px 0;font-size:.72em;color:var(--text3)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.google-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;border:1.5px solid var(--border2);border-radius:var(--rs);background:var(--white);cursor:pointer;font-size:.84em;font-weight:600;color:var(--text);transition:.15s}
+.google-btn:hover{border-color:var(--accent);background:var(--accent-lighter)}
+.google-btn img{width:18px;height:18px}
+
+/* BUTTONS */
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--rs);font-size:.9em;font-weight:700;cursor:pointer;transition:.15s;text-align:center}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn-p{background:var(--accent);color:#fff}
+.btn-s{background:var(--white);color:var(--text);border:1.5px solid var(--border2)}
+.btn-sm{display:inline-flex;padding:7px 13px;border-radius:20px;border:1.5px solid var(--border2);background:var(--white);color:var(--text2);font-size:.76em;font-weight:600;cursor:pointer}
+.btn-row{display:flex;gap:10px;margin-top:20px}.btn-row>*{flex:1}
+
+/* STEPS */
+.dots{display:flex;justify-content:center;gap:6px;margin:20px 0 24px}
+.dot{width:6px;height:6px;border-radius:3px;background:var(--border2);transition:.3s}
+.dot.on{width:20px;background:var(--accent)}
+.dot.done{background:var(--green)}
+.step{display:none}.step.on{display:block}
+.step h2{font-size:1.1em;font-weight:700;color:var(--accent);margin-bottom:4px}
+.step .hint{color:var(--text2);font-size:.8em;margin-bottom:14px}
+
+/* CHIPS with logos */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:8px 12px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--white);font-size:.78em;font-weight:600;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px;user-select:none;color:var(--text)}
+.chip:active{transform:scale(.95)}
+.chip.sel{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.chip-logo{width:22px;height:22px;border-radius:5px;object-fit:contain;background:var(--bg);flex-shrink:0}
+.chip-icon{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:1em;flex-shrink:0}
+
+/* INPUTS */
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:.72em;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px}
+.fi{width:100%;padding:12px 14px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--white);color:var(--text);font-size:.88em;outline:none;transition:.2s;font-family:inherit}
+.fi:focus{border-color:var(--accent)}
+.fi::placeholder{color:var(--text3)}
+select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%235a6a80' viewBox='0 0 16 16'%3E%3Cpath d='M8 12L2 5h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+
+/* GEO button */
+.geo-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--rs);border:1.5px dashed var(--accent);background:var(--accent-lighter);color:var(--accent);font-size:.8em;font-weight:600;cursor:pointer;transition:.15s;margin-bottom:12px;width:100%}
+.geo-btn:active{opacity:.8}
+.geo-btn .geo-spin{width:16px;height:16px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.geo-btn.loading .geo-spin{display:block}
+.geo-btn.loading .geo-icon{display:none}
+.geo-btn.done{border-color:var(--green);background:var(--green-bg);color:var(--green);border-style:solid}
+
+/* SEARCH BAR */
+.search-wrap{position:relative;margin-bottom:14px}
+.search-bar{width:100%;padding:14px 14px 14px 42px;border-radius:28px;border:1.5px solid var(--border2);background:var(--white);font-size:.88em;color:var(--text);outline:none;transition:.2s;font-family:inherit;box-shadow:var(--shadow)}
+.search-bar:focus{border-color:var(--accent);box-shadow:var(--shadow2)}
+.search-bar::placeholder{color:var(--text3)}
+.search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:1em;color:var(--text3);pointer-events:none}
+.search-hints{display:flex;gap:6px;overflow-x:auto;padding:4px 0;scrollbar-width:none;margin-top:8px}
+.search-hints::-webkit-scrollbar{display:none}
+.sh{padding:6px 11px;border-radius:16px;background:var(--white);border:1px solid var(--border);font-size:.7em;color:var(--text2);white-space:nowrap;cursor:pointer;font-weight:500;transition:.15s}
+.sh:active{background:var(--accent-lighter);border-color:var(--accent);color:var(--accent)}
+
+/* DASHBOARD HEADER */
+.dh{padding:14px 0 6px;display:flex;align-items:center;justify-content:space-between}
+.dh h1{font-size:1.15em;font-weight:800;color:var(--accent);letter-spacing:-.3px}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95em}
+.greet{color:var(--text2);font-size:.78em;margin-bottom:4px}
+.loc-badge{display:inline-flex;align-items:center;gap:4px;background:var(--green-bg);border:1px solid var(--green-border);padding:4px 10px;border-radius:12px;font-size:.7em;color:var(--green);font-weight:600;margin-bottom:14px;cursor:pointer}
+.loc-badge.no-loc{background:var(--orange-bg);border-color:var(--orange-border);color:var(--orange)}
+.slabel{font-size:.68em;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:16px 0 8px}
+
+/* BANK SCROLL with logos */
+.bscroll{display:flex;gap:10px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;scrollbar-width:none}
+.bscroll::-webkit-scrollbar{display:none}
+.bcard{flex:0 0 180px;scroll-snap-align:start;padding:14px;border-radius:var(--r);color:#fff;position:relative;overflow:hidden;min-height:90px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;box-shadow:var(--shadow2)}
+.bcard:active{opacity:.9}
+.bcard .bn{font-size:.85em;font-weight:800;display:flex;align-items:center;gap:7px}
+.bcard .bn img{width:24px;height:24px;border-radius:5px;background:rgba(255,255,255,.9)}
+.bcard .bp{font-size:.65em;opacity:.75;margin-top:2px}
+.bcard .bt{font-size:.58em;text-transform:uppercase;letter-spacing:.6px;opacity:.5;margin-top:auto}
+.bcard::after{content:'';position:absolute;right:-15px;top:-15px;width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.08)}
+
+/* QUICK ACTIONS */
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qcard{background:var(--white);border-radius:var(--r);padding:14px 12px;border:1.5px solid var(--border);cursor:pointer;transition:.15s;box-shadow:var(--shadow)}
+.qcard:active{background:var(--bg);transform:scale(.97)}
+.qcard .qi{font-size:1.4em;margin-bottom:5px}
+.qcard .qt{font-size:.82em;font-weight:700;color:var(--accent)}.qcard .qd{font-size:.68em;color:var(--text2);margin-top:2px}
+
+/* PROMO CARDS */
+.pcard{background:var(--white);border-radius:var(--r);padding:14px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer;transition:.15s;box-shadow:var(--shadow)}
+.pcard:active{background:var(--bg)}
+.pcard .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.pcard .pb{font-size:.65em;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:4px;display:flex;align-items:center;gap:4px}
+.pcard .pb img{width:14px;height:14px;border-radius:3px}
+.pcard .pd{font-size:1.2em;font-weight:800;color:var(--green)}
+.pcard .pt{font-size:.84em;font-weight:600;color:var(--text);margin-bottom:4px}
+.pcard .pm{font-size:.72em;color:var(--text2);line-height:1.5}
+.pcard .pm b{color:var(--orange);font-weight:600}
+.pcard .unavail{font-size:.68em;color:var(--red);font-weight:600;margin-top:4px}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
+.modal.on{display:flex}
+.sheet{background:var(--white);border-radius:16px 16px 0 0;padding:16px 16px 36px;width:100%;max-width:500px;max-height:88dvh;overflow-y:auto;animation:slideUp .25s ease}
+.sheet .handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 14px}
+.sheet h3{font-size:1.05em;font-weight:700;color:var(--accent);margin-bottom:10px}
+
+/* RECO BOXES */
+.rbox{border-radius:var(--r);padding:14px;margin-bottom:8px}
+.rbox-best{background:var(--accent-lighter);border:1.5px solid #b0cff0}
+.rbox-alt{background:var(--bg);border:1px solid var(--border)}
+.rbox-tip{background:var(--orange-bg);border:1px solid var(--orange-border)}
+.rbox-warn{background:var(--red-bg);border:1px solid #f0b0b0}
+.rbox .rl{font-size:.63em;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px}
+.rbox-best .rl{color:var(--accent)}.rbox-alt .rl{color:var(--text3)}.rbox-tip .rl{color:var(--orange)}.rbox-warn .rl{color:var(--red)}
+.rbox .rb{font-size:1em;font-weight:800;color:var(--accent);margin-bottom:3px}
+.rbox .rd{font-size:.82em;color:var(--text2);line-height:1.5}
+.rbox .rd p{margin-bottom:3px}
+
+/* SUB ITEMS with logos */
+.sitem{display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--white);border-radius:var(--rs);margin-bottom:6px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.sitem .sl{display:flex;align-items:center;gap:10px}
+.sitem .si{width:28px;height:28px;border-radius:6px;object-fit:contain}
+.sitem .si-emoji{font-size:1.4em;width:28px;text-align:center}
+.sitem .sn{font-weight:700;font-size:.84em}
+.sitem .sc{font-size:.68em;color:var(--text2)}
+.sitem .sp{font-size:.82em;font-weight:700;color:var(--accent)}
+
+/* TIPS */
+.stip{padding:11px 13px;border-radius:var(--rs);margin-bottom:8px;font-size:.8em;line-height:1.5}
+.stip-g{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.stip-b{background:var(--accent-lighter);border:1px solid #b0cff0;color:var(--accent)}
+.stip-o{background:var(--orange-bg);border:1px solid var(--orange-border);color:var(--orange)}
+
+/* CATEGORY TABS */
+.ctabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.ctabs::-webkit-scrollbar{display:none}
+.ctab{padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);color:var(--text2);font-size:.73em;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s}
+.ctab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:none;justify-content:center;padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:100}
+.bnav.on{display:flex}
+.ni{flex:1;max-width:90px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px;background:transparent;border:none;color:var(--text3);cursor:pointer;transition:.15s}
+.ni.on{color:var(--accent)}
+.ni .nn{font-size:1.15em}.ni .nl{font-size:.6em;font-weight:600}
+
+.hidden{display:none!important}
+.loader{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+@media(max-width:400px){.qgrid{grid-template-columns:1fr}.bcard{flex:0 0 160px}}
+</style>
+</head>
+<body>
+
+<!-- WELCOME / AUTH -->
+<div class="scr on" id="s-auth">
+<div class="welcome fu">
+<div class="logo">🏷️</div>
+<h1>Promos</h1>
+<p>Sabé siempre con qué pagar. Tu asistente inteligente de promos bancarias.</p>
+<p class="tagline">La primera app argentina que te dice el mejor medio de pago para cada compra</p>
+</div>
+<div class="auth-box fu" style="animation-delay:.1s">
+<h3>Ingresá a tu cuenta</h3>
+<div class="auth-toggle">
+<button class="on" onclick="authMode('login')">Iniciar sesión</button>
+<button onclick="authMode('register')">Crear cuenta</button>
+</div>
+<div id="authNameRow" class="fg hidden"><label>Nombre</label><input class="fi" id="aName" placeholder="Tu nombre" autocomplete="name"></div>
+<div class="fg"><label>Email</label><input class="fi" id="aEmail" placeholder="tu@email.com" type="email" autocomplete="email"></div>
+<div class="fg"><label>Contraseña</label><input class="fi" id="aPass" placeholder="••••••••" type="password" autocomplete="current-password"></div>
+<button class="btn btn-p" id="authBtn" onclick="doAuth()">Iniciar sesión</button>
+<div class="auth-err" id="authErr"></div>
+<div class="divider">o</div>
+<button class="google-btn" onclick="doGoogle()">
+<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 010-9.18l-7.98-6.19a24.1 24.1 0 000 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+Continuar con Google
+</button>
+<div class="auth-skip">
+<a onclick="skipAuth()">Usar sin cuenta (datos solo en este dispositivo)</a>
+</div>
+</div>
+<p style="text-align:center;margin-top:16px;font-size:.65em;color:var(--text3)">🔒 Tus datos están protegidos</p>
+</div>
+
+<!-- ONBOARDING -->
+<div class="scr" id="s-onboard">
+<div class="dots" id="dots"></div>
+<div class="step" id="st-1"><div class="fu">
+<h2>📍 Tu ubicación</h2><p class="hint">Para mostrarte solo promos de comercios cercanos</p>
+<button class="geo-btn" id="geoBtn" onclick="detectGeo()">
+<span class="geo-icon">📍</span><span class="geo-spin"></span>
+<span id="geoTxt">Detectar mi ubicación automáticamente</span>
+</button>
+<div class="fg"><label>Ciudad</label><input class="fi" id="iCity" placeholder="Ej: Pergamino, Rosario, CABA..." autocomplete="off"></div>
+<div class="fg"><label>Provincia</label><select class="fi" id="iProv"><option value="">Seleccioná</option><option>Buenos Aires</option><option>CABA</option><option>Catamarca</option><option>Chaco</option><option>Chubut</option><option>Córdoba</option><option>Corrientes</option><option>Entre Ríos</option><option>Formosa</option><option>Jujuy</option><option>La Pampa</option><option>La Rioja</option><option>Mendoza</option><option>Misiones</option><option>Neuquén</option><option>Río Negro</option><option>Salta</option><option>San Juan</option><option>San Luis</option><option>Santa Cruz</option><option>Santa Fe</option><option>Santiago del Estero</option><option>Tierra del Fuego</option><option>Tucumán</option></select></div>
+<label style="display:flex;align-items:center;gap:8px;font-size:.8em;color:var(--text2);cursor:pointer"><input type="checkbox" id="iTrav"> Viajo seguido (mostrar promos de ruta y combustible)</label>
+</div></div>
+<div class="step" id="st-2"><div class="fu">
+<h2>🏦 Tus bancos y tarjetas</h2><p class="hint">Seleccioná todos los que uses para pagar</p>
+<div class="chips" id="cBanks"></div>
+<div style="margin-top:10px;display:flex;gap:6px"><input class="fi" id="iCBank" placeholder="Otro banco..." style="font-size:.8em;flex:1"><button class="btn-sm" onclick="addC('bank')">+ Agregar</button></div>
+</div></div>
+<div class="step" id="st-3"><div class="fu">
+<h2>📺 Tus suscripciones</h2><p class="hint">Para optimizar cuánto pagás por mes</p>
+<div class="chips" id="cSubs"></div>
+<div style="margin-top:10px;display:flex;gap:6px"><input class="fi" id="iCSub" placeholder="Otra suscripción..." style="font-size:.8em;flex:1"><button class="btn-sm" onclick="addC('sub')">+ Agregar</button></div>
+</div></div>
+<div class="step" id="st-4"><div class="fu">
+<h2>🛒 Dónde comprás</h2><p class="hint">Supermercados y comercios habituales</p>
+<div class="chips" id="cSupers"></div>
+</div></div>
+<div class="btn-row">
+<button class="btn btn-s" id="bBack" onclick="pStep()">Atrás</button>
+<button class="btn btn-p" id="bNext" onclick="nStep()">Siguiente</button>
+</div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="scr" id="s-dash">
+<div class="dh"><h1>Promos</h1><div style="display:flex;gap:6px"><button class="icon-btn" onclick="detectGeoQuick()" title="Actualizar ubicación">📍</button><button class="icon-btn" onclick="go('s-profile')">⚙️</button></div></div>
+<div class="greet" id="dGreet"></div>
+<div class="loc-badge" id="locBadge" onclick="detectGeoQuick()"></div>
+
+<!-- SEARCH BAR -->
+<div class="search-wrap">
+<span class="search-icon">🔍</span>
+<input class="search-bar" id="searchBar" placeholder="¿A dónde vas? Ej: Carrefour, cine, helado..." autocomplete="off" oninput="onSearchInput()" onkeydown="if(event.key==='Enter')doSearch()">
+</div>
+<div class="search-hints" id="searchHints">
+<div class="sh" onclick="quickSearch('Carrefour')">🛒 Carrefour</div>
+<div class="sh" onclick="quickSearch('cargar nafta')">⛽ Nafta</div>
+<div class="sh" onclick="quickSearch('salir a comer')">🍽️ Comer</div>
+<div class="sh" onclick="quickSearch('farmacia')">💊 Farmacia</div>
+<div class="sh" onclick="quickSearch('compra grande')">💳 Cuotas</div>
+<div class="sh" onclick="quickSearch('cine')">🎬 Cine</div>
+<div class="sh" onclick="quickSearch('heladería')">🍦 Helado</div>
+<div class="sh" onclick="quickSearch('McDonald\'s')">🍔 Fast food</div>
+</div>
+
+<div class="slabel">🏦 Mis medios de pago</div>
+<div class="bscroll" id="dBanks"></div>
+<div class="slabel">🔥 Lo mejor para hoy</div>
+<div id="dPromos"></div>
+</div>
+
+<!-- PROMOS -->
+<div class="scr" id="s-promos">
+<div class="dh"><h1>Todas las promos</h1><div></div></div>
+<div class="ctabs" id="promoCats"></div>
+<div id="promoFull"></div>
+</div>
+
+<!-- SUSCRIPCIONES -->
+<div class="scr" id="s-subs">
+<div class="dh"><h1>Suscripciones</h1><div></div></div>
+<div id="subList"></div>
+<div class="slabel">💡 Cómo optimizar</div>
+<div id="subTips"></div>
+</div>
+
+<!-- PERFIL -->
+<div class="scr" id="s-profile">
+<div class="dh"><h1>Mi Perfil</h1><div></div></div>
+<div id="profUser"></div>
+<div id="profInfo"></div>
+<div class="btn-row" style="margin-top:24px">
+<button class="btn btn-s" onclick="navTo('s-dash',0)">Volver</button>
+<button class="btn btn-p" onclick="if(confirm('¿Reconfigurar perfil?')){resetProfile()}">Reconfigurar</button>
+</div>
+<div id="logoutRow" class="hidden" style="margin-top:10px">
+<button class="btn btn-s" style="color:var(--red);border-color:var(--red)" onclick="doLogout()">Cerrar sesión</button>
+</div>
+<div class="slabel" style="margin-top:20px">💬 Feedback</div>
+<div class="pcard" style="cursor:pointer" onclick="openFeedback()">
+<div class="pm"><strong>📣 ¿Falta una promo? ¿Algo está mal?</strong><br><span style="font-size:.85em;color:var(--text2)">Ayudanos a mejorar. Reportá promos incorrectas, sugerí nuevas o contanos qué te gustaría ver.</span></div>
+</div>
+<div class="pcard" style="cursor:pointer" onclick="shareApp()">
+<div class="pm"><strong>📲 Invitá amigos</strong><br><span style="font-size:.85em;color:var(--text2)">Compartí Promos por WhatsApp para que tus amigos también ahorren.</span></div>
+</div>
+<div style="text-align:center;margin-top:6px"><button class="btn-sm" onclick="installPWA()" id="installBtn" style="display:none">📱 Instalar como app</button></div>
+<p style="text-align:center;margin-top:20px;font-size:.65em;color:var(--text3)">Promos v1.0 Beta · Mayo 2026 · Hecho en Argentina 🇦🇷 · 62 promos</p>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal" onclick="if(event.target===this)this.classList.remove('on')">
+<div class="sheet"><div class="handle"></div><div id="mC"></div>
+<div style="display:flex;gap:8px;margin-top:14px">
+<button class="btn btn-s" style="flex:1" onclick="document.getElementById('modal').classList.remove('on')">Cerrar</button>
+<button class="btn btn-s" style="flex:0 0 auto;color:var(--green);border-color:var(--green)" onclick="shareCurrentPromo()">📲 Compartir</button>
+</div>
+</div></div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav" id="bnav">
+<button class="ni on" onclick="navTo('s-dash',0)"><span class="nn">🏠</span><span class="nl">Inicio</span></button>
+<button class="ni" onclick="navTo('s-promos',1)"><span class="nn">🔥</span><span class="nl">Promos</span></button>
+<button class="ni" onclick="navTo('s-subs',2)"><span class="nn">📺</span><span class="nl">Suscripciones</span></button>
+<button class="ni" onclick="navTo('s-profile',3)"><span class="nn">👤</span><span class="nl">Perfil</span></button>
+</div>
+
+<script>
+// ===== FIREBASE CONFIG =====
+// TODO: Replace with your Firebase project config
+const FIREBASE_CONFIG={apiKey:"AIzaSyDemo",authDomain:"mipago-app.firebaseapp.com",projectId:"mipago-app",storageBucket:"mipago-app.appspot.com",messagingSenderId:"000000000",appId:"1:000000000:web:000000000"};
+let fbReady=false,fbUser=null,db=null;
+try{firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();fbReady=true}catch(e){console.log('Firebase not configured, using local mode')}
+
+// ===== LOGO URLS (clearbit + fallbacks) =====
+const LOGOS={
+'galicia':'https://logo.clearbit.com/bancogalicia.com.ar',
+'nacion':'https://logo.clearbit.com/bna.com.ar',
+'icbc':'https://logo.clearbit.com/icbc.com.ar',
+'macro':'https://logo.clearbit.com/macro.com.ar',
+'provincia':'https://logo.clearbit.com/bancoprovincia.com.ar',
+'mercadopago':'https://logo.clearbit.com/mercadopago.com.ar',
+'carrefour-banco':'https://logo.clearbit.com/carrefour.com.ar',
+'bbva':'https://logo.clearbit.com/bbva.com.ar',
+'santander':'https://logo.clearbit.com/santander.com.ar',
+'hsbc':'https://logo.clearbit.com/hsbc.com.ar',
+'brubank':'https://logo.clearbit.com/brubank.com.ar',
+'uala':'https://logo.clearbit.com/uala.com.ar',
+'naranjax':'https://logo.clearbit.com/naranjax.com',
+'supervielle':'https://logo.clearbit.com/supervielle.com.ar',
+'comafi':'https://logo.clearbit.com/comafi.com.ar',
+'patagonia':'https://logo.clearbit.com/bancopatagonia.com.ar',
+'ciudad':'https://logo.clearbit.com/bancociudad.com.ar',
+'credicoop':'https://logo.clearbit.com/bancocredicoop.coop',
+'hipotecario':'https://logo.clearbit.com/hipotecario.com.ar',
+'bind':'https://logo.clearbit.com/bind.com.ar',
+'roela':'https://logo.clearbit.com/bancoroela.com.ar',
+'bica':'https://logo.clearbit.com/bfrancesnet.com.ar',
+'prex':'https://logo.clearbit.com/prexcard.com',
+'personal-pay':'https://logo.clearbit.com/personal.com.ar',
+'modo':'https://logo.clearbit.com/modo.com.ar',
+'reba':'https://logo.clearbit.com/rfreba.com.ar',
+// Subs
+'netflix':'https://logo.clearbit.com/netflix.com',
+'disney':'https://logo.clearbit.com/disneyplus.com',
+'max':'https://logo.clearbit.com/max.com',
+'prime':'https://logo.clearbit.com/primevideo.com',
+'paramount':'https://logo.clearbit.com/paramountplus.com',
+'spotify':'https://logo.clearbit.com/spotify.com',
+'youtube':'https://logo.clearbit.com/youtube.com',
+'flow':'https://logo.clearbit.com/flow.com.ar',
+'clublanacion':'https://logo.clearbit.com/lanacion.com.ar',
+'crunchyroll':'https://logo.clearbit.com/crunchyroll.com',
+'starz':'https://logo.clearbit.com/starz.com',
+'mubi':'https://logo.clearbit.com/mubi.com',
+'apple-tv':'https://logo.clearbit.com/apple.com',
+'deezer':'https://logo.clearbit.com/deezer.com',
+'directvgo':'https://logo.clearbit.com/directvgo.com',
+'personal':'https://logo.clearbit.com/personal.com.ar',
+'claro':'https://logo.clearbit.com/claro.com.ar',
+'movistar':'https://logo.clearbit.com/movistar.com.ar',
+'starlink':'https://logo.clearbit.com/starlink.com',
+// Apps
+'ypf-app':'https://logo.clearbit.com/ypf.com',
+'shell-app':'https://logo.clearbit.com/shell.com.ar',
+};
+function logoImg(id,size=22){const u=LOGOS[id];return u?`<img src="${u}" class="chip-logo" style="width:${size}px;height:${size}px" onerror="this.style.display='none'">`:''}
+
+// ===== STORE PRESENCE BY CITY SIZE =====
+const CITY_TIERS={
+metro:['caba','capital federal','buenos aires','rosario','córdoba','cordoba','mendoza','la plata','tucumán','tucuman','mar del plata','salta','santa fe','san miguel de tucumán'],
+grande:['bahía blanca','bahia blanca','neuquén','neuquen','resistencia','corrientes','posadas','paraná','parana','san juan','santiago del estero','formosa','san luis','río cuarto','rio cuarto','tandil','olavarría','olavarria','san nicolás','san nicolas','junín','junin','zárate','zarate','campana','luján','lujan','pilar','escobar','morón','moron','quilmes','avellaneda','lanús','lanus','lomas de zamora','san isidro','tigre','san fernando','vicente lópez','vicente lopez','merlo','moreno','florencio varela','almirante brown','berazategui','esteban echeverría','ezeiza','ituzaingó','tres de febrero','hurlingham','san martín','san martin','malvinas argentinas','josé c. paz','san miguel'],
+mediana:['pergamino','chivilcoy','bragado','nueve de julio','chacabuco','mercedes','san pedro','colón','colon','rafaela','reconquista','venado tuerto','villa maría','villa maria','san francisco','bell ville','río tercero','rio tercero','villa carlos paz','gualeguaychú','gualeguaychu','concepción del uruguay','concordia','villaguay','azul','trenque lauquen','pehuajó','pehuajo','lincoln','general pico','santa rosa','rawson','trelew','comodoro rivadavia','río gallegos','rio gallegos','ushuaia','san rafael','general roca','cipolletti','viedma','oberá','eldorado']
+};
+
+const STORE_TIER={
+// Comercios que solo existen en ciudades grandes
+'cinemark':'metro','hoyts':'metro',
+'coto':'metro','jumbo':'metro','disco':'metro',
+'farmacity':'metro',
+// Ciudades grandes+
+'changomas':'grande','vea':'grande','makro':'grande',
+'mcdonalds':'grande','burger king':'grande','starbucks':'grande',
+'burger-king':'grande','mcdonalds':'grande',
+// Presencia amplia
+'carrefour':'mediana','dia':'mediana','diarco':'mediana',
+'la anonima':'mediana','nini':'mediana',
+// En todos lados
+'ypf':'all','shell':'all','axion':'grande',
+'farmacia':'all','restaurantes adheridos':'all','pedidosya':'mediana',
+'carnicerías adheridas':'all','ferias y mercados pba':'all',
+'farmaplus (online)':'all','tienda bna+ (tiendabna.com.ar)':'all',
+'icbc mall':'all','despegar.com':'all',
+'súpers interior pba':'all','múltiples cadenas':'all',
+'cadenas adheridas':'all','estaciones adheridas':'all','estaciones ypf':'all','estaciones shell':'all',
+'ypf boxes':'all','carrefour (no maxi)':'mediana','carrefour maxi':'grande',
+'coto digital (online)':'all','supermercados día':'mediana',
+'farmacias adheridas':'all','freddo':'grande','rappi':'grande',
+'comercios de cercanía':'all','librerías adheridas':'all',
+'estaciones ypf, shell, puma':'all','estaciones ypf, shell, puma, axion':'all',
+'estaciones gulf':'grande','estaciones dapsa':'grande',
+'día online':'all','jumbo / disco / vea':'metro','tiento':'mediana',
+'múltiples rubros':'all','comercios no-alimentos':'all','múltiples comercios':'all',
+'arredo':'grande',
+};
+
+function getCityTier(city){
+if(!city)return 'mediana';
+const c=city.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+for(const[tier,cities]of Object.entries(CITY_TIERS)){
+if(cities.some(ct=>c.includes(ct.normalize('NFD').replace(/[̀-ͯ]/g,''))||ct.normalize('NFD').replace(/[̀-ͯ]/g,'').includes(c)))return tier;
+}
+return 'mediana'; // default for unknown cities
+}
+
+function tierRank(t){return{all:0,mediana:1,grande:2,metro:3}[t]||1}
+
+function storeAvailable(storeName,cityTier){
+if(!storeName)return true;
+const s=storeName.toLowerCase();
+const storeTier=STORE_TIER[s];
+if(!storeTier)return true; // unknown stores = assume available
+if(storeTier==='all')return true;
+return tierRank(cityTier)>=tierRank(storeTier);
+}
+
+// ===== PROMOS REALES MAYO 2026 (actualizado 06/05) =====
+// acum: true = se puede acumular con promos de otro stackGroup
+// stackGroup: string para agrupar promos acumulables (ej: 'club-ln-freddo' + 'galicia-freddo')
+const PROMOS=[
+// ===================== SUPERMERCADOS =====================
+// -- Carrefour --
+{id:1,bank:'carrefour-banco',cat:'super',title:'15% con Tarjeta Mi Carrefour Crédito',pct:15,days:[1,2],dayTxt:'Lunes y Martes',detail:'Descuento en el acto con Tarjeta Mi Carrefour Crédito. Sin tope. En todos los locales Carrefour excepto Maxi.',tope:'Sin tope',where:'Carrefour (no Maxi)',badge:'Tarjeta Carrefour',bc:'#0052cc'},
+{id:2,bank:'carrefour-banco',cat:'super',title:'20% con Tarjeta Carrefour en Maxi',pct:20,days:[4],dayTxt:'Jueves',detail:'20% de descuento en locales Carrefour Maxi con Tarjeta Mi Carrefour Crédito.',tope:'$10.000',where:'Carrefour Maxi',badge:'Tarjeta Carrefour',bc:'#0052cc'},
+{id:3,bank:'carrefour-banco',cat:'super',title:'10% Cuenta Digital Mi Carrefour',pct:10,days:[6,0],dayTxt:'Sábados y Domingos',detail:'10% de descuento con la Cuenta Digital Mi Carrefour.',tope:'Consultar',where:'Carrefour',badge:'Cuenta Digital',bc:'#0052cc'},
+{id:4,bank:'carrefour-banco',cat:'super',title:'10% Programa Mi Carrefour',pct:10,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'10% de descuento dentro del programa Mi Carrefour. Tope de devolución $35.000/mes.',tope:'$35.000/mes',where:'Carrefour',badge:'Mi Carrefour',bc:'#0052cc'},
+// -- Cuenta DNI (Provincia) --
+{id:5,bank:'provincia',cat:'super',title:'10% en Carrefour con Cuenta DNI',pct:10,days:[3],dayTxt:'Miércoles',detail:'Reintegro inmediato pagando con QR Cuenta DNI en Carrefour.',tope:'Sin tope',where:'Carrefour',badge:'Cuenta DNI',bc:'#00695c'},
+{id:6,bank:'provincia',cat:'super',title:'10% en Día con Cuenta DNI',pct:10,days:[1],dayTxt:'Lunes',detail:'Reintegro pagando con QR Cuenta DNI en supermercados Día. Sin tope de reintegro.',tope:'Sin tope',where:'Supermercados Día',badge:'Cuenta DNI',bc:'#00695c'},
+{id:7,bank:'provincia',cat:'super',title:'15% en súpers interior bonaerense',pct:15,days:[2,3],dayTxt:'Martes y Miércoles',detail:'Reintegro con Cuenta DNI en supermercados del interior de Buenos Aires. Tope $6.000/semana con compra mínima de $30.000.',tope:'$6.000/semana',where:'Súpers interior PBA',badge:'Cuenta DNI',bc:'#00695c'},
+{id:8,bank:'provincia',cat:'super',title:'40% en ferias y mercados bonaerenses',pct:40,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'Reintegro con Cuenta DNI en ferias y mercados de la provincia de Buenos Aires. Compra mínima $15.000.',tope:'$6.000/semana',where:'Ferias y mercados PBA',badge:'Cuenta DNI',bc:'#00695c'},
+{id:9,bank:'provincia',cat:'super',title:'20% en carnicerías',pct:20,days:[1,2,3,4,5],dayTxt:'Lunes a Viernes',detail:'Reintegro con Cuenta DNI en carnicerías adheridas. Consumo mínimo $25.000.',tope:'$5.000/semana',where:'Carnicerías adheridas',badge:'Cuenta DNI',bc:'#00695c'},
+{id:65,bank:'provincia',cat:'super',title:'20% Changomás con Cuenta DNI',pct:20,days:[4,5,6],dayTxt:'Jueves, Viernes y Sábados',detail:'Reintegro en el acto pagando con QR Cuenta DNI en Changomás. Sin tope de reintegro.',tope:'Sin tope',where:'Changomás',badge:'Cuenta DNI',bc:'#00695c'},
+{id:66,bank:'provincia',cat:'super',title:'15% en Nini con Cuenta DNI',pct:15,days:[2],dayTxt:'Martes',detail:'Reintegro pagando con QR Cuenta DNI en supermercados Nini.',tope:'$6.000/semana',where:'Nini',badge:'Cuenta DNI',bc:'#00695c'},
+{id:67,bank:'provincia',cat:'super',title:'20% comercios de cercanía',pct:20,days:[1,2,3,4,5],dayTxt:'Lunes a Viernes',detail:'Reintegro con Cuenta DNI en comercios de cercanía adheridos. Tope $5.000/semana con consumo de $25.000.',tope:'$5.000/semana',where:'Comercios de cercanía',badge:'Cuenta DNI',bc:'#00695c'},
+// -- Banco Nación --
+{id:10,bank:'nacion',cat:'super',title:'30% en supermercados con BNA+',pct:30,days:[3],dayTxt:'Miércoles',detail:'Reintegro con BNA+ MODO. Cadenas: Carrefour, Toledo, Josimar, Arcoiris, Supera, Cordiez, Tienda Nova, Dar, Libertad, Diarco (30%), Maxiconsumo (30%), Nini (20%), Makro (20%). Compra mínima $40.000 para tope completo.',tope:'$12.000/semana',where:'Cadenas adheridas',badge:'BNA+ / MODO',bc:'#0052cc'},
+{id:11,bank:'nacion',cat:'super',title:'20% en Changomás',pct:20,days:[1],dayTxt:'Lunes',detail:'Reintegro con BNA+. Compra mínima $75.000. Tope mensual.',tope:'$25.000/mes',where:'Changomás',badge:'BNA+',bc:'#0052cc'},
+{id:12,bank:'nacion',cat:'super',title:'20% en Coto',pct:20,days:[2],dayTxt:'Martes',detail:'Reintegro con BNA+. Compra mínima $60.000.',tope:'$25.000/mes',where:'Coto',badge:'BNA+',bc:'#0052cc'},
+{id:68,bank:'nacion',cat:'super',title:'5% extra jubilados en súpers',pct:5,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'5% de reintegro adicional para jubilados/pensionados en compras presenciales con BNA+ en supermercados adheridos. Se suma automáticamente al reintegro del día.',tope:'$5.000/semana, máx $20.000/mes',where:'Cadenas adheridas',badge:'BNA+ Jubilados',bc:'#0052cc'},
+// -- Galicia --
+{id:13,bank:'galicia',cat:'super',title:'30% Éminent / 25% general en Coto Digital',pct:30,days:[4],dayTxt:'Jueves',detail:'Reintegro en Coto Digital (web). 30% para Éminent, 25% para clientes generales. Pago en 1 cuota.',tope:'Éminent $60.000 / General $30.000',where:'Coto Digital (online)',badge:'Galicia',bc:'#c0392b'},
+{id:69,bank:'galicia',cat:'super',title:'25% en Día con Galicia',pct:25,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'Reintegro pagando con MODO, tarjeta física o contactless con Visa crédito/débito Galicia en supermercados Día.',tope:'$15.000/mes',where:'Supermercados Día',badge:'Galicia',bc:'#c0392b'},
+{id:70,bank:'galicia',cat:'super',title:'30% Día Online (Éminent)',pct:30,days:[4],dayTxt:'Jueves',detail:'Día Online los jueves con Galicia Éminent. 30% reintegro en compras web/app.',tope:'$30.000/mes',where:'Día Online',badge:'Galicia Éminent',bc:'#c0392b'},
+{id:71,bank:'galicia',cat:'super',title:'30% Jumbo/Disco/Vea Éminent',pct:30,days:[0,1,2,3,4,5,6],dayTxt:'Consultar días',detail:'Reintegro para clientes Éminent en Jumbo, Disco y Vea. 25% para clientes generales.',tope:'Éminent $40.000 / General $25.000',where:'Jumbo / Disco / Vea',badge:'Galicia',bc:'#c0392b'},
+// -- ICBC --
+{id:72,bank:'icbc',cat:'super',title:'30% en Coto (débito MODO, sin tope)',pct:30,days:[4],dayTxt:'Jueves',detail:'Pagando con Visa ICBC débito a través de Apple Pay, Google Pay o MODO. Sin tope de reintegro.',tope:'Sin tope',where:'Coto',badge:'ICBC Débito',bc:'#8b0000'},
+{id:73,bank:'icbc',cat:'super',title:'20% comercios de cercanía ICBC',pct:20,days:[1,2,3,4,5],dayTxt:'Lunes a Viernes',detail:'20% de descuento en comercios de cercanía pagando con tarjetas ICBC.',tope:'$5.000/semana',where:'Comercios de cercanía',badge:'ICBC',bc:'#8b0000'},
+// -- Macro --
+{id:74,bank:'macro',cat:'super',title:'25% en Tiento con Macro',pct:25,days:[3],dayTxt:'Miércoles',detail:'Reintegro con tarjetas Macro en supermercados Tiento.',tope:'$20.000',where:'Tiento',badge:'Macro',bc:'#4a4a6a'},
+{id:75,bank:'macro',cat:'super',title:'30% Selecta sábados (MODO)',pct:30,days:[6],dayTxt:'Sábados',detail:'Para Visa Signature, Amex Icon, MC Black. 30% de ahorro pagando con MODO. Aplica en múltiples rubros.',tope:'$20.000/mes por rubro y cuenta',where:'Múltiples rubros',badge:'Macro Selecta',bc:'#4a4a6a'},
+// -- Mercado Pago --
+{id:14,bank:'mercadopago',cat:'super',title:'25% reintegro QR en supermercados',pct:25,days:[0,1,2,3,4,5,6],dayTxt:'Consultar días en app',detail:'Reintegro pagando con QR en Carrefour, Coto, Día, Jumbo, Changomás, Diarco, Makro, Nini. Hasta 25% según cadena y día.',tope:'$12.000/semana',where:'Múltiples cadenas',badge:'Mercado Pago',bc:'#009ee3'},
+{id:76,bank:'mercadopago',cat:'super',title:'15% La Anónima todos los días QR',pct:15,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'15% de descuento pagando con QR Mercado Pago en La Anónima. Sin tope.',tope:'Sin tope',where:'La Anónima',badge:'Mercado Pago QR',bc:'#009ee3'},
+
+// ===================== COMBUSTIBLE =====================
+{id:20,bank:'mercadopago',cat:'nafta',title:'30% en combustible con TC Mercado Pago',pct:30,days:[1],dayTxt:'Lunes',detail:'Pagando con tarjeta de crédito física de Mercado Pago en estaciones adheridas. En YPF se acumula con App YPF.',tope:'$6.000/mes',where:'Estaciones adheridas',badge:'Mercado Pago TC',bc:'#009ee3',acum:true,stackType:'bank'},
+{id:21,bank:'nacion',cat:'nafta',title:'20% en estaciones de servicio',pct:20,days:[5],dayTxt:'Viernes',detail:'Reintegro con QR MODO BNA+ en YPF, Shell, Axion Energy, Gulf y Dapsa. En YPF se acumula con descuento de la App YPF.',tope:'$10.000/mes',where:'Estaciones adheridas',badge:'BNA+ / MODO',bc:'#0052cc',acum:true,stackType:'bank'},
+{id:22,bank:'macro',cat:'nafta',title:'30% Selecta combustible (MODO)',pct:30,days:[3],dayTxt:'Miércoles',detail:'Segmento Selecta: Visa Signature, Amex Icon, MC Black. Pagando con MODO en estaciones adheridas. En YPF se acumula con App YPF.',tope:'$25.000/mes',where:'Estaciones adheridas',badge:'Macro Selecta',bc:'#4a4a6a',acum:true,stackType:'bank'},
+{id:23,bank:'macro',cat:'nafta',title:'20% Macro combustible',pct:20,days:[3],dayTxt:'Miércoles',detail:'Reintegro para clientes Macro cartera general.',tope:'$15.000/mes',where:'Estaciones adheridas',badge:'Macro',bc:'#4a4a6a'},
+{id:77,bank:'galicia',cat:'nafta',title:'15% Éminent / 10% general en combustible',pct:15,days:[1],dayTxt:'Lunes',detail:'Reintegro pagando con Mastercard Galicia vía MODO. 15% Éminent, 10% cartera general. En YPF, Shell, Puma. En YPF se acumula con el descuento de la App YPF.',tope:'$15.000/mes (Éminent) · $8.000/mes (general)',where:'Estaciones YPF, Shell, Puma',badge:'Galicia',bc:'#c0392b',acum:true,stackType:'bank'},
+{id:78,bank:'galicia',cat:'nafta',title:'25% Día 10 de cada mes (combustible)',pct:25,days:[0,1,2,3,4,5,6],dayTxt:'Día 10 de cada mes',detail:'25% de ahorro el día 10 en YPF, Puma, Shell y Axion pagando con Mastercard Galicia vía MODO.',tope:'Consultar',where:'Estaciones YPF, Shell, Puma, Axion',badge:'Galicia MODO',bc:'#c0392b'},
+{id:24,bank:'ypf-app',cat:'nafta',title:'6% en cualquier combustible (App YPF)',pct:6,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'6% de descuento diario para socios que cargan con la App YPF en cualquier combustible. Sin tope (excepto gasoil grado 2: 150 litros/mes). Acumulable con reintegros bancarios.',tope:'Sin tope',where:'Estaciones YPF',badge:'App YPF',bc:'#005eb8',acum:true,stackType:'loyalty'},
+{id:79,bank:'ypf-app',cat:'nafta',title:'10% bonus Infinia (App YPF)',pct:10,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'10% adicional pagando con "Dinero en cuenta" en la app YPF, solo línea Infinia. Acumulable con descuento de socio YPF.',tope:'Variable',where:'Estaciones YPF',badge:'App YPF Infinia',bc:'#005eb8',acum:true,stackType:'loyalty'},
+{id:25,bank:'shell-app',cat:'nafta',title:'10% en V-Power vía Shell Box',pct:10,days:[3],dayTxt:'Miércoles',detail:'Descuento pagando por Shell Box en combustible V-Power.',tope:'$4.000/semana',where:'Estaciones Shell',badge:'Shell Box',bc:'#dd1d21'},
+{id:26,bank:'nacion',cat:'nafta',title:'30% cambio de aceite YPF Boxes',pct:30,days:[0,1,2,3,4,5,6],dayTxt:'Todo mayo',detail:'30% reintegro en cambio de aceite Elaion Auro o FS en red Boxes de YPF.',tope:'$25.000',where:'YPF Boxes',badge:'BNA+',bc:'#0052cc'},
+{id:80,bank:'mercadopago',cat:'nafta',title:'10% Gulf con QR MP (jueves)',pct:10,days:[4],dayTxt:'Jueves',detail:'Pagando con QR Mercado Pago en estaciones Gulf.',tope:'Consultar',where:'Estaciones Gulf',badge:'Mercado Pago QR',bc:'#009ee3'},
+{id:81,bank:'mercadopago',cat:'nafta',title:'10% Dapsa con QR MP (miércoles)',pct:10,days:[3],dayTxt:'Miércoles',detail:'Pagando con QR Mercado Pago en estaciones Dapsa.',tope:'Consultar',where:'Estaciones Dapsa',badge:'Mercado Pago QR',bc:'#009ee3'},
+
+// ===================== GASTRONOMIA =====================
+{id:30,bank:'nacion',cat:'gastro',title:'25% en gastronomía',pct:25,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'Reintegro en restaurantes adheridos con BNA+ / MODO. Máximo 5 transacciones por tarjeta por mes.',tope:'$10.000/compra, máx 5 op./mes',where:'Restaurantes adheridos',badge:'BNA+',bc:'#0052cc'},
+{id:31,bank:'icbc',cat:'gastro',title:'30% Exclusive / 20% general en gastro',pct:30,days:[0,1,2,3,4,5,6],dayTxt:'Consultar días',detail:'Exclusive Banking: 30%. General: 20%. Pagando con MODO.',tope:'Exclusive $20.000/mes · General $15.000/mes',where:'Restaurantes adheridos',badge:'Club ICBC',bc:'#8b0000'},
+{id:32,bank:'icbc',cat:'gastro',title:'30% en PedidosYa',pct:30,days:[0,1,2,3,4,5,6],dayTxt:'Consultar',detail:'Pagando con tarjetas ICBC en PedidosYa.',tope:'Consultar en app',where:'PedidosYa',badge:'ICBC',bc:'#8b0000'},
+{id:33,bank:'macro',cat:'gastro',title:'30% Selecta en restaurantes',pct:30,days:[6],dayTxt:'Sábados',detail:'Para Visa Signature, Amex Icon, MC Black. Pagando con MODO.',tope:'$20.000/mes por rubro y cuenta',where:'Restaurantes adheridos',badge:'Macro Selecta',bc:'#4a4a6a'},
+{id:34,bank:'mercadopago',cat:'gastro',title:"30% en McDonald's",pct:30,days:[5],dayTxt:'Viernes',detail:'Pagando con QR Mercado Pago.',tope:'Consultar en app',where:"McDonald's",badge:'Mercado Pago',bc:'#009ee3'},
+{id:35,bank:'mercadopago',cat:'gastro',title:'15% en Burger King',pct:15,days:[3],dayTxt:'Miércoles',detail:'Pagando con QR Mercado Pago.',tope:'Consultar en app',where:'Burger King',badge:'Mercado Pago',bc:'#009ee3'},
+{id:36,bank:'nacion',cat:'gastro',title:'25% en heladerías',pct:25,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'Reintegro con BNA+ en heladerías adheridas (Grido, Chungo, etc).',tope:'$10.000/compra',where:'Heladerías adheridas',badge:'BNA+',bc:'#0052cc'},
+{id:37,bank:'provincia',cat:'gastro',title:'20% en restaurantes con Cuenta DNI',pct:20,days:[5,6],dayTxt:'Viernes y Sábados',detail:'Reintegro pagando con QR Cuenta DNI en restaurantes adheridos.',tope:'$5.000/semana',where:'Restaurantes adheridos',badge:'Cuenta DNI',bc:'#00695c'},
+{id:82,bank:'galicia',cat:'gastro',title:'25% en Rappi con Galicia (miércoles)',pct:25,days:[3],dayTxt:'Miércoles',detail:'25% de reintegro pagando pedidos en Rappi con tarjeta Galicia.',tope:'$10.000/mes',where:'Rappi',badge:'Galicia',bc:'#c0392b'},
+// -- Freddo (Club La Nación = beneficio propio, NO banco) --
+{id:83,bank:'clublanacion',cat:'gastro',title:'2x1 cucuruchos Freddo (Club LN)',pct:50,days:[1,2,3,4,5],dayTxt:'Lunes a Viernes',detail:'2x1 en cucuruchos de Freddo con Club La Nación. NO acumulable con otras promos. Vigente hasta dic 2026.',tope:'—',where:'Freddo',badge:'Club La Nación',bc:'#1a237e',acum:false},
+{id:84,bank:'clublanacion',cat:'gastro',title:'35% 1kg Freddo miércoles (Club LN)',pct:35,days:[3],dayTxt:'Miércoles',detail:'35% de ahorro en 1 kilo de helado Freddo con Club La Nación. NO acumulable con otras promos.',tope:'—',where:'Freddo',badge:'Club La Nación',bc:'#1a237e',acum:false},
+{id:85,bank:'clublanacion',cat:'gastro',title:'20% Freddo todos los días (Club LN)',pct:20,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'20% de ahorro en todos los productos Freddo con Club La Nación. NO acumulable con promos bancarias.',tope:'—',where:'Freddo',badge:'Club La Nación',bc:'#1a237e',acum:false},
+{id:86,bank:'galicia',cat:'gastro',title:'20% en Freddo con Galicia MODO',pct:20,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'20% de reintegro pagando con MODO/contactless con Visa crédito/débito Galicia. NO acumulable con Club La Nación.',tope:'$12.000/mes',where:'Freddo',badge:'Galicia',bc:'#c0392b',acum:false},
+
+// ===================== CUOTAS =====================
+{id:40,bank:'nacion',cat:'cuotas',title:'Hasta 20 cuotas sin interés en Tienda BNA+',pct:0,days:[0,1,2,3,4,5,6],dayTxt:'Hasta 31/05/2026',detail:'Electro, tecnología, hogar, construcción, colchones, bicis y motos. 12 a 20 cuotas sin interés según rubro.',tope:'—',where:'Tienda BNA+ (tiendabna.com.ar)',badge:'BNA+',bc:'#0052cc'},
+{id:41,bank:'icbc',cat:'cuotas',title:'Hot Sale: 18 cuotas sin interés + reintegro',pct:0,days:[0,1,2,3,4,5,6],dayTxt:'11, 12 y 13 de Mayo',detail:'ICBC Mall. Hasta 18 cuotas sin interés. Reintegros de hasta $50.000 en 3 cuotas vía MODO.',tope:'Reintegro hasta $50.000',where:'ICBC Mall',badge:'ICBC',bc:'#8b0000'},
+{id:87,bank:'provincia',cat:'cuotas',title:'3 cuotas sin interés NFC (Cuenta DNI)',pct:0,days:[0,1,2,3,4,5,6],dayTxt:'Todo mayo',detail:'3 cuotas sin interés pagando con TC vinculada a Cuenta DNI vía NFC (contactless). No aplica en alimentos.',tope:'—',where:'Comercios no-alimentos',badge:'Cuenta DNI NFC',bc:'#00695c'},
+{id:88,bank:'mercadopago',cat:'cuotas',title:'3 cuotas sin interés (+$50.000)',pct:0,days:[0,1,2,3,4,5,6],dayTxt:'Todo mayo',detail:'Hasta 3 cuotas sin interés con TC Mercado Pago en compras superiores a $50.000.',tope:'—',where:'Múltiples comercios',badge:'Mercado Pago',bc:'#009ee3'},
+
+// ===================== SALUD / FARMACIA =====================
+{id:50,bank:'provincia',cat:'salud',title:'10% en farmacias y perfumerías',pct:10,days:[3,4],dayTxt:'Miércoles y Jueves',detail:'Pagando con Cuenta DNI en farmacias y perfumerías adheridas.',tope:'Sin tope',where:'Farmacias adheridas',badge:'Cuenta DNI',bc:'#00695c'},
+{id:51,bank:'galicia',cat:'salud',title:'Reintegro en FarmaPlus online',pct:10,days:[0,1,2,3,4,5,6],dayTxt:'Todos los días',detail:'Éminent: tope de reintegro $10.000/mes. General: $8.000/mes. Solo compras online.',tope:'Éminent $10.000/mes · General $8.000/mes',where:'FarmaPlus (online)',badge:'Galicia',bc:'#c0392b'},
+{id:89,bank:'icbc',cat:'salud',title:'10% en farmacias y perfumerías ICBC',pct:10,days:[3,4],dayTxt:'Miércoles y Jueves',detail:'10% de descuento con tarjetas ICBC en farmacias y perfumerías adheridas.',tope:'Consultar',where:'Farmacias adheridas',badge:'ICBC',bc:'#8b0000'},
+{id:90,bank:'icbc',cat:'salud',title:'10% en librerías ICBC',pct:10,days:[1,2],dayTxt:'Lunes y Martes',detail:'10% de descuento en librerías de texto con tarjetas ICBC.',tope:'Consultar',where:'Librerías adheridas',badge:'ICBC',bc:'#8b0000'},
+
+// ===================== ENTRETENIMIENTO =====================
+{id:60,bank:'mercadopago',cat:'entret',title:'2x1 en Cinemark',pct:50,days:[0,1,2,3,4,5,6],dayTxt:'Consultar',detail:'Pagando con Mercado Pago.',tope:'—',where:'Cinemark',badge:'Mercado Pago',bc:'#009ee3'},
+{id:61,bank:'mercadopago',cat:'entret',title:'Hasta 15% en Despegar (Hot Sale)',pct:15,days:[0,1,2,3,4,5,6],dayTxt:'Mayo 2026',detail:'Vuelos y hoteles internacionales con descuento + cuotas sin interés.',tope:'Consultar',where:'Despegar.com',badge:'Mercado Pago',bc:'#009ee3'},
+{id:91,bank:'galicia',cat:'entret',title:'25% en Arredo con Galicia (jueves)',pct:25,days:[4],dayTxt:'Jueves',detail:'25% de reintegro pagando con tarjeta Galicia en Arredo.',tope:'Consultar',where:'Arredo',badge:'Galicia',bc:'#c0392b'},
+];
+
+const BANKS=[
+{id:'galicia',n:'Galicia',prog:'Éminent / Quiero!',c:'linear-gradient(135deg,#9b1c1c,#dc2626)'},
+{id:'nacion',n:'Nación',prog:'BNA+ / MODO',c:'linear-gradient(135deg,#003a70,#0066cc)'},
+{id:'icbc',n:'ICBC',prog:'Club ICBC',c:'linear-gradient(135deg,#6b0000,#b91c1c)'},
+{id:'macro',n:'Macro',prog:'Selecta / viüMi',c:'linear-gradient(135deg,#1a1a2e,#4a4a6a)'},
+{id:'provincia',n:'Provincia',prog:'Cuenta DNI',c:'linear-gradient(135deg,#004d40,#00897b)'},
+{id:'mercadopago',n:'Mercado Pago',prog:'QR / Crédito',c:'linear-gradient(135deg,#005f8a,#009ee3)'},
+{id:'carrefour-banco',n:'Banco Carrefour',prog:'Tarjeta Mi Carrefour',c:'linear-gradient(135deg,#003080,#0052cc)'},
+{id:'bbva',n:'BBVA',prog:'BBVA Go',c:'linear-gradient(135deg,#002a5c,#004481)'},
+{id:'santander',n:'Santander',prog:'SuperClub',c:'linear-gradient(135deg,#7f0000,#cc0000)'},
+{id:'hsbc',n:'HSBC',prog:'HSBC+',c:'linear-gradient(135deg,#7f0000,#b00020)'},
+{id:'brubank',n:'Brubank',prog:'Digital',c:'linear-gradient(135deg,#3b0764,#7c3aed)'},
+{id:'uala',n:'Ualá',prog:'Ualá+',c:'linear-gradient(135deg,#6b0f3a,#db2777)'},
+{id:'naranjax',n:'Naranja X',prog:'Plan Z',c:'linear-gradient(135deg,#9a3412,#ea580c)'},
+{id:'supervielle',n:'Supervielle',prog:'Identité',c:'linear-gradient(135deg,#3e2723,#795548)'},
+{id:'comafi',n:'Comafi',prog:'Comafi+',c:'linear-gradient(135deg,#1a237e,#3f51b5)'},
+{id:'patagonia',n:'Patagonia',prog:'Club Patagonia',c:'linear-gradient(135deg,#bf360c,#e65100)'},
+{id:'ciudad',n:'Banco Ciudad',prog:'Ciudad',c:'linear-gradient(135deg,#004d40,#00796b)'},
+{id:'credicoop',n:'Credicoop',prog:'Cooperativo',c:'linear-gradient(135deg,#1a237e,#283593)'},
+{id:'hipotecario',n:'Hipotecario',prog:'HIP',c:'linear-gradient(135deg,#01579b,#0277bd)'},
+{id:'bind',n:'Bind',prog:'Inversiones',c:'linear-gradient(135deg,#1b5e20,#388e3c)'},
+{id:'roela',n:'Roela',prog:'Roela',c:'linear-gradient(135deg,#0d47a1,#1565c0)'},
+{id:'bica',n:'BICA',prog:'BICA',c:'linear-gradient(135deg,#2e7d32,#43a047)'},
+{id:'prex',n:'Prex',prog:'Prex',c:'linear-gradient(135deg,#1b5e20,#2e7d32)'},
+{id:'personal-pay',n:'Personal Pay',prog:'Pay',c:'linear-gradient(135deg,#0d47a1,#1976d2)'},
+{id:'modo',n:'MODO',prog:'MODO',c:'linear-gradient(135deg,#4a148c,#7b1fa2)'},
+{id:'reba',n:'Reba',prog:'Reba',c:'linear-gradient(135deg,#f57f17,#f9a825)'},
+{id:'clublanacion',n:'Club La Nación',prog:'2x1 y descuentos',c:'linear-gradient(135deg,#0d1b4a,#1a237e)'},
+];
+
+const SUBS=[
+{id:'netflix',n:'Netflix',cat:'Streaming',price:7499},{id:'disney',n:'Disney+',cat:'Streaming',price:4799},
+{id:'max',n:'Max (HBO)',cat:'Streaming',price:5999},{id:'prime',n:'Prime Video',cat:'Streaming',price:2999},
+{id:'paramount',n:'Paramount+',cat:'Streaming',price:3999},{id:'spotify',n:'Spotify',cat:'Música',price:3499},
+{id:'youtube',n:'YouTube Premium',cat:'Música/Video',price:4299},{id:'flow',n:'Flow',cat:'TV/Internet',price:18900},
+{id:'clublanacion',n:'Club La Nación',cat:'Beneficios',price:6900},{id:'crunchyroll',n:'Crunchyroll',cat:'Anime',price:2599},
+{id:'starz',n:'Starz',cat:'Streaming',price:2999},{id:'mubi',n:'MUBI',cat:'Cine',price:3299},
+{id:'apple-tv',n:'Apple TV+',cat:'Streaming',price:3999},{id:'deezer',n:'Deezer',cat:'Música',price:3299},
+{id:'directvgo',n:'DGO',cat:'TV',price:5999},{id:'personal',n:'Personal',cat:'Telefonía',price:12000},
+{id:'claro',n:'Claro',cat:'Telefonía',price:11000},{id:'movistar',n:'Movistar',cat:'Telefonía',price:10500},
+{id:'starlink',n:'Starlink',cat:'Internet',price:175000},
+];
+
+const SUPERS=[
+{id:'carrefour',n:'Carrefour'},{id:'coto',n:'Coto'},{id:'changomas',n:'Changomás'},
+{id:'disco',n:'Disco'},{id:'jumbo',n:'Jumbo'},{id:'dia',n:'Día'},
+{id:'vea',n:'Vea'},{id:'makro',n:'Makro'},{id:'nini',n:'Nini'},
+{id:'diarco',n:'Diarco'},{id:'anonima',n:'La Anónima'},{id:'maxiconsumo',n:'Maxiconsumo'},
+{id:'vital',n:'Vital'},{id:'otro',n:'Almacén / Otro'},
+];
+
+const CATS=[{id:'all',l:'Todas'},{id:'super',l:'🛒 Súper'},{id:'nafta',l:'⛽ Nafta'},{id:'gastro',l:'🍽️ Gastro'},{id:'cuotas',l:'💳 Cuotas'},{id:'salud',l:'💊 Salud'},{id:'entret',l:'🎬 Entret.'}];
+
+let P=null,cs=1,tb=[],ts=[],tsp=[],authModeVal='login',geoLat=null,geoLng=null;
+const DN=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+// ===== AUTH =====
+function authMode(m){authModeVal=m;document.querySelectorAll('.auth-toggle button').forEach((b,i)=>b.classList.toggle('on',i===(m==='login'?0:1)));document.getElementById('authNameRow').classList.toggle('hidden',m==='login');document.getElementById('authBtn').textContent=m==='login'?'Iniciar sesión':'Crear cuenta';document.getElementById('authErr').textContent=''}
+
+async function doAuth(){
+const email=document.getElementById('aEmail').value.trim();
+const pass=document.getElementById('aPass').value;
+const err=document.getElementById('authErr');
+if(!email||!pass){err.textContent='Completá email y contraseña';return}
+if(pass.length<6){err.textContent='La contraseña debe tener al menos 6 caracteres';return}
+document.getElementById('authBtn').disabled=true;
+if(!fbReady){
+// Fallback: local-only auth simulation
+const users=JSON.parse(localStorage.getItem('promos_users')||'{}');
+if(authModeVal==='register'){
+if(users[email]){err.textContent='Ya existe una cuenta con ese email';document.getElementById('authBtn').disabled=false;return}
+const name=document.getElementById('aName').value.trim()||email.split('@')[0];
+users[email]={pass,name,created:Date.now()};
+localStorage.setItem('promos_users',JSON.stringify(users));
+localStorage.setItem('promos_session',email);
+P=loadLocal(email);
+afterAuth(name);
+}else{
+const u=users[email];
+if(!u||u.pass!==pass){err.textContent='Email o contraseña incorrectos';document.getElementById('authBtn').disabled=false;return}
+localStorage.setItem('promos_session',email);
+P=loadLocal(email);
+afterAuth(u.name);
+}
+return;
+}
+try{
+if(authModeVal==='register'){
+const cred=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+const name=document.getElementById('aName').value.trim()||email.split('@')[0];
+await cred.user.updateProfile({displayName:name});
+P=await loadCloud(cred.user.uid);
+afterAuth(name);
+}else{
+const cred=await firebase.auth().signInWithEmailAndPassword(email,pass);
+P=await loadCloud(cred.user.uid);
+afterAuth(cred.user.displayName||email.split('@')[0]);
+}
+}catch(e){
+const msgs={'auth/email-already-in-use':'Ya existe una cuenta con ese email','auth/invalid-email':'Email inválido','auth/wrong-password':'Contraseña incorrecta','auth/user-not-found':'No existe cuenta con ese email','auth/invalid-credential':'Email o contraseña incorrectos'};
+err.textContent=msgs[e.code]||e.message;
+document.getElementById('authBtn').disabled=false;
+}
+}
+
+async function doGoogle(){
+if(!fbReady){document.getElementById('authErr').textContent='Google Sign-In requiere conexión a Firebase';return}
+try{
+const provider=new firebase.auth.GoogleAuthProvider();
+const result=await firebase.auth().signInWithPopup(provider);
+P=await loadCloud(result.user.uid);
+afterAuth(result.user.displayName||'');
+}catch(e){document.getElementById('authErr').textContent=e.message}
+}
+
+function skipAuth(){
+localStorage.setItem('promos_session','_local_');
+P=loadLocal('_local_');
+afterAuth('');
+}
+
+function afterAuth(name){
+document.getElementById('authBtn').disabled=false;
+if(P){
+// Profile exists, go to dashboard
+document.getElementById('bnav').classList.add('on');
+navTo('s-dash',0);
+}else{
+// New user, go to onboarding
+go('s-onboard');initOnboard();
+}
+}
+
+function doLogout(){
+if(fbReady)firebase.auth().signOut();
+localStorage.removeItem('promos_session');
+P=null;
+document.querySelector('.bnav').classList.remove('on');
+go('s-auth');
+}
+
+function resetProfile(){
+const session=localStorage.getItem('promos_session')||'_local_';
+localStorage.removeItem('promos_'+session);
+if(fbReady&&firebase.auth().currentUser){
+db.collection('profiles').doc(firebase.auth().currentUser.uid).delete().catch(()=>{});
+}
+P=null;
+document.querySelector('.bnav').classList.remove('on');
+go('s-onboard');initOnboard();
+}
+
+// ===== STORAGE =====
+function loadLocal(key){const d=localStorage.getItem('promos_'+key);return d?JSON.parse(d):null}
+function saveLocal(key,data){localStorage.setItem('promos_'+key,JSON.stringify(data))}
+async function loadCloud(uid){
+if(!fbReady)return null;
+try{const doc=await db.collection('profiles').doc(uid).get();return doc.exists?doc.data():null}catch(e){return loadLocal(uid)}
+}
+async function saveCloud(uid,data){
+if(!fbReady)return;
+try{await db.collection('profiles').doc(uid).set(data)}catch(e){console.log('Cloud save failed',e)}
+}
+function saveProfile(){
+const session=localStorage.getItem('promos_session')||'_local_';
+saveLocal(session,P);
+if(fbReady&&firebase.auth().currentUser){saveCloud(firebase.auth().currentUser.uid,P)}
+}
+
+// ===== GEOLOCATION =====
+function detectGeo(){
+const btn=document.getElementById('geoBtn');
+const txt=document.getElementById('geoTxt');
+if(!navigator.geolocation){txt.textContent='Tu navegador no soporta geolocalización';return}
+btn.classList.add('loading');
+txt.textContent='Detectando ubicación...';
+navigator.geolocation.getCurrentPosition(
+async pos=>{
+geoLat=pos.coords.latitude;geoLng=pos.coords.longitude;
+txt.textContent='Buscando tu ciudad...';
+try{
+const resp=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${geoLat}&lon=${geoLng}&format=json&accept-language=es`);
+const data=await resp.json();
+const city=data.address.city||data.address.town||data.address.village||data.address.municipality||'';
+const state=data.address.state||'';
+if(city)document.getElementById('iCity').value=city;
+if(state){
+const sel=document.getElementById('iProv');
+for(let i=0;i<sel.options.length;i++){
+if(sel.options[i].text.toLowerCase().includes(state.toLowerCase().replace('provincia de ',''))){sel.selectedIndex=i;break}
+}
+}
+btn.classList.remove('loading');btn.classList.add('done');
+txt.textContent=`📍 ${city}${state?', '+state.replace('Provincia de ',''):''}`;
+}catch(e){
+btn.classList.remove('loading');btn.classList.add('done');
+txt.textContent=`📍 Ubicación detectada (${geoLat.toFixed(2)}, ${geoLng.toFixed(2)})`;
+}
+},
+err=>{
+btn.classList.remove('loading');
+txt.textContent='No se pudo detectar. Ingresá manualmente.';
+},{enableHighAccuracy:false,timeout:10000}
+);
+}
+
+function detectGeoQuick(){
+if(!navigator.geolocation)return;
+navigator.geolocation.getCurrentPosition(async pos=>{
+geoLat=pos.coords.latitude;geoLng=pos.coords.longitude;
+try{
+const resp=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${geoLat}&lon=${geoLng}&format=json&accept-language=es`);
+const data=await resp.json();
+const city=data.address.city||data.address.town||data.address.village||data.address.municipality||'';
+if(city&&P){P.city=city;P.lat=geoLat;P.lng=geoLng;saveProfile();renderDash()}
+}catch(e){}
+},{},{enableHighAccuracy:false,timeout:8000});
+}
+
+// ===== NAVIGATION =====
+function go(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on')}
+function navTo(id,idx){go(id);document.querySelectorAll('.ni').forEach((n,i)=>n.classList.toggle('on',i===idx));if(id==='s-dash')renderDash();if(id==='s-promos')renderAllPromos();if(id==='s-subs')renderSubs()}
+
+// ===== ONBOARDING =====
+function initOnboard(){cs=1;tb=[];ts=[];tsp=[];
+document.getElementById('cBanks').innerHTML=BANKS.map(x=>`<div class="chip" data-id="${x.id}" onclick="tc(this,0)">${logoImg(x.id)}<span>${x.n}</span></div>`).join('');
+document.getElementById('cSubs').innerHTML=SUBS.map(x=>`<div class="chip" data-id="${x.id}" onclick="tc(this,1)">${logoImg(x.id)}<span>${x.n}</span></div>`).join('');
+document.getElementById('cSupers').innerHTML=SUPERS.map(x=>`<div class="chip" data-id="${x.id}" onclick="tc(this,2)"><span>${x.n}</span></div>`).join('');
+renderStep()}
+function renderStep(){document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('on',i===cs-1));let d='';for(let i=1;i<=4;i++)d+=`<div class="dot ${i===cs?'on':i<cs?'done':''}"></div>`;document.getElementById('dots').innerHTML=d;document.getElementById('bBack').style.visibility=cs===1?'hidden':'visible';document.getElementById('bNext').textContent=cs===4?'Listo ✓':'Siguiente'}
+function nStep(){if(cs<4){cs++;renderStep()}else saveP()}
+function pStep(){if(cs>1){cs--;renderStep()}}
+function tc(el,t){el.classList.toggle('sel');const id=el.dataset.id,a=t===0?tb:t===1?ts:tsp,x=a.indexOf(id);x>=0?a.splice(x,1):a.push(id)}
+function addC(t){const inp=document.getElementById(t==='bank'?'iCBank':'iCSub'),v=inp.value.trim();if(!v)return;const id='x_'+v.toLowerCase().replace(/\s/g,'_');if(t==='bank'){BANKS.push({id,n:v,prog:'',c:'linear-gradient(135deg,#555,#888)'});tb.push(id);document.getElementById('cBanks').innerHTML+=`<div class="chip sel" data-id="${id}" onclick="tc(this,0)"><span class="chip-icon">🏦</span><span>${v}</span></div>`}else{SUBS.push({id,n:v,cat:'Otro',price:0});ts.push(id);document.getElementById('cSubs').innerHTML+=`<div class="chip sel" data-id="${id}" onclick="tc(this,1)"><span class="chip-icon">📌</span><span>${v}</span></div>`}inp.value=''}
+function saveP(){
+P={city:document.getElementById('iCity').value.trim()||'—',prov:document.getElementById('iProv').value||'',trav:document.getElementById('iTrav').checked,banks:tb,subs:ts,supers:tsp,lat:geoLat,lng:geoLng,created:Date.now()};
+saveProfile();
+document.getElementById('bnav').classList.add('on');
+navTo('s-dash',0);
+}
+
+// ===== HELPERS =====
+function has(id){return P&&P.banks.includes(id)}
+function myTier(){return getCityTier(P?P.city:'')}
+function isAvail(p){return storeAvailable(p.where,myTier())}
+function isMine(p){return P.banks.includes(p.bank)||['ypf-app','shell-app'].includes(p.bank)||(p.bank==='clublanacion'&&(P.banks.includes('clublanacion')||P.subs.includes('clublanacion')))}
+function todayPromos(){const d=new Date().getDay();return PROMOS.filter(p=>p.days.includes(d)&&isMine(p)&&isAvail(p))}
+function myPromos(cat){return PROMOS.filter(p=>isMine(p)&&(cat==='all'||p.cat===cat))}
+
+// Smart sort: higher % first, then "sin tope" wins over capped, then higher tope
+function smartSort(a,b){
+if(b.pct!==a.pct)return b.pct-a.pct;
+const aNoTope=a.tope.toLowerCase().includes('sin tope');
+const bNoTope=b.tope.toLowerCase().includes('sin tope');
+if(aNoTope&&!bNoTope)return -1;
+if(!aNoTope&&bNoTope)return 1;
+// Try parse tope amounts
+const aAmt=parseTope(a.tope),bAmt=parseTope(b.tope);
+return bAmt-aAmt;
+}
+function parseTope(t){const m=t.replace(/\./g,'').match(/\$(\d+)/);return m?parseInt(m[1]):0}
+
+// ===== ACCUMULATIVE / STACKABLE PROMOS =====
+// REGLA CLAVE: Solo se acumulan promos de DISTINTA FUENTE.
+// Fuente 'loyalty' = programa del comercio (App YPF, ACA, Mi Carrefour puntos)
+// Fuente 'bank' = medio de pago (tarjeta, billetera, QR)
+// NO se pueden usar dos medios de pago a la vez.
+// Un promo type:'loyalty' se puede combinar con un promo type:'bank' para el MISMO comercio.
+
+function findStackable(promo,candidates){
+if(promo.acum===false)return [];
+if(!promo.acum)return []; // solo las marcadas explícitamente acum:true stackean
+const promoType=promo.stackType||'bank'; // default = bank
+const w=promo.where.toLowerCase();
+return candidates.filter(p=>{
+if(p.id===promo.id)return false;
+if(!p.acum)return false;
+if(p.acum===false)return false;
+const pType=p.stackType||'bank';
+// REGLA: deben ser de distinto tipo (loyalty + bank)
+if(pType===promoType)return false;
+// Deben ser para el mismo comercio/lugar o comercios que se solapan
+const pw=p.where.toLowerCase();
+// "estaciones adheridas" incluye "estaciones ypf"
+const fuelOverlap=(w.includes('estaciones')&&pw.includes('estaciones'))||(w.includes('ypf')&&pw.includes('estaciones'))||(pw.includes('ypf')&&w.includes('estaciones'));
+if(!fuelOverlap&&pw!==w&&!pw.includes(w)&&!w.includes(pw))return false;
+return true;
+});
+}
+
+function calcCombinedPct(pct1,pct2){
+const r1=1-pct1/100, r2=1-pct2/100;
+return Math.round((1-r1*r2)*100*10)/10;
+}
+
+function stackHTML(promo,dayPromos){
+const stacks=findStackable(promo,dayPromos);
+if(!stacks.length)return '';
+let html='';
+stacks.forEach(s=>{
+const combined=calcCombinedPct(promo.pct,s.pct);
+const promoType=promo.stackType||'bank';
+const sType=s.stackType||'bank';
+const loyaltyName=promoType==='loyalty'?promo.badge:s.badge;
+const bankName=promoType==='bank'?promo.badge:s.badge;
+html+=`<div style="margin-top:8px;padding:10px 12px;border-radius:var(--rs);background:#e8f8ef;border:1.5px solid #b8e6c8">
+<div style="font-size:.63em;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:var(--green);margin-bottom:3px">🔗 PROMO ACUMULABLE</div>
+<div style="font-size:.82em;font-weight:700;color:var(--text)">Combiná: ${loyaltyName} (programa) + pagá con ${bankName}</div>
+<div style="font-size:.75em;color:var(--text2);margin-top:2px">${s.title}</div>
+<div style="font-size:.88em;font-weight:800;color:var(--green);margin-top:4px">Ahorro combinado: ~${combined}%</div>
+<div style="font-size:.68em;color:var(--text3);margin-top:2px">Primero aplica el descuento del programa (${promoType==='loyalty'?promo.pct:s.pct}%), después el reintegro del banco (${promoType==='bank'?promo.pct:s.pct}%) sobre lo que pagás</div>
+</div>`;
+});
+return html;
+}
+
+function promoCard(p){
+const avail=isAvail(p);
+return `<div class="pcard${avail?'':' unavailable'}" onclick="showDetail(${p.id})" style="${avail?'':'opacity:.6'}">
+<div class="ph"><span class="pb" style="background:${p.bc}15;color:${p.bc}">${logoImg(p.bank,14)}${p.badge}</span>${p.pct?`<span class="pd">${p.pct}%</span>`:''}</div>
+<div class="pt">${p.title}</div>
+<div class="pm">📅 ${p.dayTxt} · 📍 ${p.where} · <b>Tope: ${p.tope}</b></div>
+${avail?'':`<div class="unavail">⚠️ No disponible en ${P.city}</div>`}
+</div>`}
+
+function showDetail(id){
+const p=PROMOS.find(x=>x.id===id);if(!p)return;
+const avail=isAvail(p);
+const day=new Date().getDay();
+const dayPromos=PROMOS.filter(pr=>pr.days.includes(day)&&isMine(pr)&&isAvail(pr));
+const stackInfo=stackHTML(p,dayPromos);
+const notAccum=p.acum===false?'<div style="margin-top:8px;padding:8px 12px;border-radius:var(--rs);background:var(--orange-bg);border:1px solid var(--orange-border);font-size:.72em;color:var(--orange);font-weight:600">⚠️ Esta promo NO es acumulable con otras promociones bancarias</div>':'';
+document.getElementById('mC').innerHTML=`
+<h3>${p.title}</h3>
+${avail?'':`<div class="rbox rbox-warn" style="margin-top:8px"><div class="rl">⚠️ NO DISPONIBLE EN TU ZONA</div><div class="rd">${p.where} no está en ${P.city}. Esta promo aplica en ciudades más grandes.</div></div>`}
+<div class="rbox rbox-best" style="margin-top:10px">
+<div class="rl">DETALLE COMPLETO</div>
+<div class="rd">
+<p><strong>Descuento:</strong> ${p.pct?p.pct+'%':'Beneficio especial'}</p>
+<p><strong>Día:</strong> ${p.dayTxt}</p>
+<p><strong>Dónde:</strong> ${p.where}</p>
+<p><strong>Tope:</strong> ${p.tope}</p>
+<p><strong>Medio de pago:</strong> ${p.badge}</p>
+<p><strong>Condiciones:</strong> ${p.detail}</p>
+</div></div>${notAccum}${stackInfo}`;
+document.getElementById('modal').classList.add('on');}
+
+// ===== SEARCH ENGINE =====
+const SEARCH_MAP=[
+// Specific stores
+{keywords:['carrefour','carrefur','carreful'],cat:'super',store:'carrefour',label:'🛒 Carrefour'},
+{keywords:['coto'],cat:'super',store:'coto',label:'🛒 Coto'},
+{keywords:['dia','día','supermercado dia'],cat:'super',store:'dia',label:'🛒 Día'},
+{keywords:['changomas','changomás','walmart'],cat:'super',store:'changomas',label:'🛒 Changomás'},
+{keywords:['jumbo'],cat:'super',store:'jumbo',label:'🛒 Jumbo'},
+{keywords:['makro'],cat:'super',store:'makro',label:'🛒 Makro'},
+// Gas
+{keywords:['nafta','combustible','naftero','cargar','estación','estacion','ypf','shell','axion','gasoil'],cat:'nafta',label:'⛽ Combustible'},
+// Gastro
+{keywords:['comer','restaurante','restaurant','salir a comer','almorzar','cenar','cena','almuerzo','bar','café','cafe','cafetería'],cat:'gastro',label:'🍽️ Gastronomía'},
+{keywords:['helado','heladería','heladeria','grido','chungo','helados'],cat:'gastro',label:'🍦 Helados'},
+{keywords:['freddo'],cat:'gastro',store:'freddo',label:'🍦 Freddo'},
+{keywords:['mcdonalds','mcdonald','mc','mcd','mac','hamburguesa'],cat:'gastro',store:'mcdonalds',label:'🍔 McDonald\'s'},
+{keywords:['burger king','bk','burger'],cat:'gastro',store:'burger-king',label:'🍔 Burger King'},
+{keywords:['pizza','pizzería','pizzeria'],cat:'gastro',label:'🍕 Pizza'},
+{keywords:['pedidosya','pedidos ya','delivery'],cat:'gastro',label:'📦 Delivery'},
+{keywords:['rappi'],cat:'gastro',store:'rappi',label:'📦 Rappi'},
+// Entertainment
+{keywords:['cine','cinemark','hoyts','película','pelicula'],cat:'entret',label:'🎬 Cine'},
+{keywords:['viaje','viajes','despegar','vuelo','vuelos','hotel','vacaciones'],cat:'entret',label:'✈️ Viajes'},
+// Health
+{keywords:['farmacia','remedios','medicamentos','perfumería','perfumeria','farmacity','farmaplus'],cat:'salud',label:'💊 Farmacia'},
+// Online/Big purchases
+{keywords:['cuotas','electro','tecnología','tecnologia','electrodoméstico','computadora','celular','notebook','tele','televisor','compra grande','mercado libre','meli'],cat:'cuotas',label:'💳 Compra Grande'},
+// Generic super
+{keywords:['super','supermercado','compras','verdulería','verduleria','feria','carnicería','carniceria','carne'],cat:'super',label:'🛒 Supermercado'},
+];
+
+function parseSearch(text){
+const t=text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+if(!t)return null;
+// Try specific store matches first, then categories
+for(const m of SEARCH_MAP){
+for(const kw of m.keywords){
+if(t.includes(kw.normalize('NFD').replace(/[̀-ͯ]/g,'')))return m;
+}
+}
+return null;
+}
+
+function doSearch(){
+const q=document.getElementById('searchBar').value.trim();
+if(!q)return;
+const match=parseSearch(q);
+if(match){
+openSmartReco(match.cat,match.store||null,match.label||q);
+}else{
+// Fallback: show all promos
+openSmartReco(null,null,'🔍 '+q);
+}
+document.getElementById('searchBar').blur();
+}
+
+function quickSearch(q){document.getElementById('searchBar').value=q;doSearch()}
+function onSearchInput(){/* Could add live suggestions here */}
+
+// Format promo title without duplicating %
+function fmtTitle(p){return p.title}
+function fmtPct(p){return p.pct?p.pct+'%':''}
+
+// Get all promos for a store/category (any day), filtered by user banks + availability
+function allMyPromos(cat,store){
+return PROMOS.filter(p=>{
+if(!isMine(p))return false;
+if(store){const s=store.toLowerCase(),w=p.where.toLowerCase(),t=p.title.toLowerCase();if(!w.includes(s)&&!t.includes(s)&&!(s==='mcdonalds'&&w.includes("mcdonald")))return false}
+else if(cat&&p.cat!==cat)return false;
+return true;
+});
+}
+
+// Build weekly calendar HTML for a store/category
+function weeklyCalendar(cat,store,label){
+const all=allMyPromos(cat,store);
+let html=`<h3>📅 Calendario Semanal</h3>`;
+html+=`<div style="font-size:.78em;color:var(--text2);margin:-4px 0 12px">${label} · 📍 ${P.city}</div>`;
+const tier=myTier();
+const today=new Date().getDay();
+for(let d=1;d<=6;d++){weekDay(d)} // Lun-Sab
+weekDay(0); // Domingo
+
+function weekDay(dayIdx){
+const dayPromos=all.filter(p=>p.days.includes(dayIdx)&&storeAvailable(p.where,tier)).sort(smartSort);
+const isToday=dayIdx===today;
+html+=`<div style="margin-bottom:10px;padding:10px 12px;border-radius:var(--rs);background:${isToday?'var(--accent-lighter)':'var(--bg)'};border:1px solid ${isToday?'#b0cff0':'var(--border)'}">`;
+html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><strong style="font-size:.82em;color:${isToday?'var(--accent)':'var(--text)'}">${DN[dayIdx]}${isToday?' (HOY)':''}</strong>`;
+if(dayPromos.length){html+=`<span style="font-size:.68em;font-weight:700;color:var(--green)">${dayPromos.length} promo${dayPromos.length>1?'s':''}</span>`}
+html+=`</div>`;
+if(dayPromos.length){
+// Best of the day
+const best=dayPromos[0];
+html+=`<div style="font-size:.8em;margin-top:4px"><span style="font-weight:800;color:var(--green)">${fmtPct(best)}</span> <strong>${fmtTitle(best)}</strong></div>`;
+html+=`<div style="font-size:.7em;color:var(--text2)">${logoImg(best.bank,12)} ${best.badge} · Tope: ${best.tope}</div>`;
+// Others
+dayPromos.slice(1).forEach(p=>{
+html+=`<div style="font-size:.72em;color:var(--text3);margin-top:3px;padding-left:8px;border-left:2px solid var(--border)">Alternativa: ${fmtPct(p)} ${fmtTitle(p)} · ${p.badge} · Tope: ${p.tope}</div>`;
+});
+// Check stackable
+const dayStacks=findStackable(best,dayPromos);
+if(dayStacks.length){
+const ds=dayStacks[0];
+const dc=calcCombinedPct(best.pct,ds.pct);
+html+=`<div style="font-size:.68em;color:var(--green);font-weight:600;margin-top:3px">🔗 Acumulable con ${ds.badge} (+${ds.pct}%) = ${dc}% total</div>`;
+}
+// Recommendation
+html+=`<div style="font-size:.7em;color:var(--accent);font-weight:600;margin-top:5px">👉 Recomendación: pagá con ${best.badge}${best.tope.toLowerCase().includes('sin tope')?' (sin tope!)':''}</div>`;
+}else{
+html+=`<div style="font-size:.75em;color:var(--text3);font-style:italic">Sin promos este día</div>`;
+}
+html+=`</div>`;
+}
+return html;
+}
+
+function openSmartReco(cat,store,label){
+const day=new Date().getDay(),dn=DN[day];
+const mc=document.getElementById('mC');
+const tier=myTier();
+
+// Get today's candidates
+let candidates;
+if(store){
+const storeL=store.toLowerCase();
+candidates=PROMOS.filter(p=>{
+const w=p.where.toLowerCase();
+const match=w.includes(storeL)||p.title.toLowerCase().includes(storeL)||(storeL==='mcdonalds'&&w.includes("mcdonald"));
+return match&&p.days.includes(day)&&isMine(p);
+}).sort(smartSort);
+}else if(cat){
+candidates=PROMOS.filter(p=>p.cat===cat&&p.days.includes(day)&&isMine(p)).sort(smartSort);
+}else{
+candidates=todayPromos().sort(smartSort);
+}
+
+const available=candidates.filter(p=>isAvail(p));
+const unavailable=candidates.filter(p=>!isAvail(p));
+
+let html=`<h3>${label}</h3>`;
+html+=`<div style="font-size:.72em;color:var(--text2);margin:-6px 0 10px">📍 ${P.city} · ${dn}</div>`;
+
+if(available.length){
+const best=available[0];
+// Check for stackable promos
+const bestStacks=findStackable(best,available);
+let stackNote='';
+if(bestStacks.length){
+const s=bestStacks[0];
+const combined=calcCombinedPct(best.pct,s.pct);
+stackNote=`<div style="margin-top:6px;padding:8px 10px;border-radius:6px;background:#e8f8ef;border:1px solid #b8e6c8"><span style="font-size:.72em;font-weight:700;color:var(--green)">🔗 ACUMULABLE:</span> <span style="font-size:.78em">+ ${s.pct}% ${s.badge} = <strong style="color:var(--green)">${combined}% ahorro total</strong></span></div>`;
+}
+html+=`<div class="rbox rbox-best" style="cursor:pointer" onclick="document.getElementById('modal').classList.remove('on');setTimeout(()=>showDetail(${best.id}),250)">
+<div class="rl">✅ TE CONVIENE HOY (${dn.toUpperCase()})</div>
+<div class="rb">${fmtTitle(best)}</div>
+<div class="rd">
+<p><strong>Descuento:</strong> ${fmtPct(best)||'Beneficio especial'}${best.tope.toLowerCase().includes('sin tope')?' · <span style="color:var(--green);font-weight:700">SIN TOPE</span>':' · Tope: '+best.tope}</p>
+<p><strong>Pagá con:</strong> ${best.badge}</p>
+<p><strong>Dónde:</strong> ${best.where}</p>
+<p style="font-size:.9em;color:var(--text3);margin-top:4px">${best.detail}</p>
+</div>${stackNote}</div>`;
+
+if(available.length>1){
+const alt=available[1];
+html+=`<div class="rbox rbox-alt" style="cursor:pointer" onclick="document.getElementById('modal').classList.remove('on');setTimeout(()=>showDetail(${alt.id}),250)">
+<div class="rl">ALTERNATIVA</div>
+<div class="rd"><strong>${fmtPct(alt)} ${fmtTitle(alt)}</strong> · ${alt.badge} · ${alt.tope.toLowerCase().includes('sin tope')?'<span style="color:var(--green);font-weight:600">Sin tope</span>':'Tope: '+alt.tope}</div>
+</div>`;}
+
+// Better day exists? → link to weekly calendar
+const allAvail=allMyPromos(cat,store).filter(p=>isAvail(p)).sort(smartSort);
+const bestOverall=allAvail.length?allAvail[0]:null;
+if(bestOverall&&(bestOverall.pct>best.pct||(bestOverall.pct===best.pct&&bestOverall.tope.toLowerCase().includes('sin tope')&&!best.tope.toLowerCase().includes('sin tope')))){
+html+=`<div class="rbox rbox-tip" style="cursor:pointer" onclick="showWeekly('${cat||''}','${store||''}','${label.replace(/'/g,"\\'")}')">
+<div class="rl">💡 ¿PODÉS ESPERAR?</div>
+<div class="rd">El <strong>${bestOverall.dayTxt}</strong> hay <strong>${fmtPct(bestOverall)} con ${bestOverall.badge}</strong>${bestOverall.tope.toLowerCase().includes('sin tope')?' <strong style="color:var(--green)">SIN TOPE</strong>':' (tope '+bestOverall.tope+')'}.<br><strong style="color:var(--accent)">→ Tocá para ver el calendario semanal completo</strong></div>
+</div>`;}else{
+// Still show calendar link
+html+=`<div class="rbox rbox-alt" style="cursor:pointer" onclick="showWeekly('${cat||''}','${store||''}','${label.replace(/'/g,"\\'")}')">
+<div class="rl">📅 CALENDARIO SEMANAL</div>
+<div class="rd"><strong style="color:var(--accent)">Ver todas las promos día por día →</strong></div>
+</div>`;}
+
+}else{
+// No promo today
+const allAvail=allMyPromos(cat,store).filter(p=>isAvail(p)).sort(smartSort);
+if(allAvail.length){
+const best=allAvail[0];
+html+=`<div class="rbox rbox-tip" style="margin-top:10px"><div class="rl">📅 HOY NO HAY PROMO EN TU ZONA</div><div class="rd">Tu mejor opción es el <strong>${best.dayTxt}</strong>: <strong>${fmtPct(best)} con ${best.badge}</strong> en ${best.where}${best.tope.toLowerCase().includes('sin tope')?' (sin tope!)':' (tope '+best.tope+')'}.</div></div>`;
+html+=`<div class="rbox rbox-alt" style="cursor:pointer;margin-top:6px" onclick="showWeekly('${cat||''}','${store||''}','${label.replace(/'/g,"\\'")}')">
+<div class="rl">📅 CALENDARIO SEMANAL</div>
+<div class="rd"><strong style="color:var(--accent)">Ver el mejor día para ir →</strong></div>
+</div>`;
+}else{
+html+=`<div class="stip stip-o" style="margin-top:10px">No encontramos promos para "${label}" con tus bancos y en tu zona. Probá agregar más bancos en tu perfil.</div>`;}
+}
+
+if(unavailable.length){
+html+=`<div style="margin-top:14px;font-size:.68em;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.8px">No disponibles en ${P.city}</div>`;
+unavailable.slice(0,2).forEach(p=>{
+html+=`<div class="rbox rbox-alt" style="opacity:.4;margin-top:6px"><div class="rd">${fmtPct(p)} ${fmtTitle(p)} · ${p.badge} · 📍 ${p.where}</div></div>`;
+});
+}
+
+mc.innerHTML=html;
+document.getElementById('modal').classList.add('on');
+}
+
+function showWeekly(cat,store,label){
+document.getElementById('modal').classList.remove('on');
+setTimeout(()=>{
+document.getElementById('mC').innerHTML=weeklyCalendar(cat||null,store||null,label);
+document.getElementById('modal').classList.add('on');
+},200);
+}
+
+// Legacy quick action buttons
+function openR(type){
+const catMap={super:'super',nafta:'nafta',gastro:'gastro',online:'cuotas',farmacia:'salud',general:null};
+const labels={super:'🛒 Ir al Supermercado',nafta:'⛽ Cargar Nafta',gastro:'🍽️ Salir a Comer',online:'💳 Compra Grande / Cuotas',farmacia:'💊 Farmacia',general:'🛍️ Mejor Medio de Pago'};
+openSmartReco(catMap[type],null,labels[type]||type);
+}
+
+// ===== DASHBOARD =====
+function renderDash(){
+const d=new Date(),h=d.getHours(),day=d.getDay();
+document.getElementById('dGreet').textContent=`${h<12?'Buen día':h<19?'Buenas tardes':'Buenas noches'} · ${DN[day]}`;
+const tier=myTier();
+const badge=document.getElementById('locBadge');
+if(P.city&&P.city!=='—'){badge.className='loc-badge';badge.innerHTML=`📍 ${P.city}${P.prov?', '+P.prov:''} · ${tier==='metro'?'Ciudad grande':'Ciudad '+tier}`}
+else{badge.className='loc-badge no-loc';badge.innerHTML='📍 Sin ubicación — Tocá para detectar'}
+
+// Banks with logos
+document.getElementById('dBanks').innerHTML=BANKS.filter(b=>P.banks.includes(b.id)).map(b=>`<div class="bcard" style="background:${b.c}" onclick="showBank('${b.id}')"><div><div class="bn">${logoImg(b.id,24)}${b.n}</div><div class="bp">${b.prog}</div></div><div class="bt">Ver promos →</div></div>`).join('');
+
+// Best promos for today — RANKED, filtered by location
+const tp=todayPromos().sort(smartSort);
+if(tp.length){
+const best=tp[0];
+document.getElementById('dPromos').innerHTML=`
+<div class="rbox rbox-best" style="cursor:pointer" onclick="showDetail(${best.id})">
+<div class="rl">⭐ MEJOR PROMO HOY (${DN[day]}) EN ${(P.city||'TU ZONA').toUpperCase()}</div>
+<div class="rb">${fmtTitle(best)}</div>
+<div class="rd"><span style="font-weight:800;color:var(--green)">${fmtPct(best)}</span> · ${best.badge} · ${best.where} · ${best.tope.toLowerCase().includes('sin tope')?'<strong style="color:var(--green)">Sin tope</strong>':'Tope: '+best.tope}</div>
+</div>`+tp.slice(1,5).map(promoCard).join('');
+}else{
+document.getElementById('dPromos').innerHTML='<div class="stip stip-b">No hay promos activas hoy para tus bancos en tu zona. Revisá la sección Promos para ver por día.</div>';
+}
+renderProfile();
+}
+
+function showBank(id){
+const bp=PROMOS.filter(p=>p.bank===id).sort(smartSort);
+const b=BANKS.find(x=>x.id===id);
+document.getElementById('mC').innerHTML=`<h3>${logoImg(id,20)} ${b?b.n:id}</h3>`+(bp.length?bp.map(p=>{
+const avail=isAvail(p);
+return `<div class="rbox rbox-alt" style="margin-top:8px;cursor:pointer;${avail?'':'opacity:.5'}" onclick="document.getElementById('modal').classList.remove('on');setTimeout(()=>showDetail(${p.id}),250)">
+<div style="display:flex;justify-content:space-between;align-items:center"><div class="rl">${p.dayTxt}</div>${p.pct?`<span style="font-weight:800;color:var(--green)">${p.pct}%</span>`:''}</div>
+<div style="font-weight:700;font-size:.88em;margin:3px 0">${p.title}</div>
+<div class="rd">Tope: ${p.tope} · ${p.where}${avail?'':`<br><span style="color:var(--red);font-weight:600">⚠️ No disponible en ${P.city}</span>`}</div>
+</div>`}).join(''):'<div class="stip stip-o" style="margin-top:8px">No tenemos promos cargadas para este banco todavía.</div>');
+document.getElementById('modal').classList.add('on');
+}
+
+// ===== ALL PROMOS =====
+function renderAllPromos(){
+document.getElementById('promoCats').innerHTML=CATS.map(c=>`<div class="ctab${c.id==='all'?' on':''}" onclick="filterP('${c.id}',this)">${c.l}</div>`).join('');
+filterP('all');}
+function filterP(cat,btn){
+if(btn)document.querySelectorAll('.ctab').forEach(c=>c.classList.remove('on')),btn.classList.add('on');
+const fp=myPromos(cat).sort(smartSort);
+document.getElementById('promoFull').innerHTML=fp.length?fp.map(promoCard).join(''):'<div class="stip stip-b" style="margin-top:10px">No hay promos en esta categoría con tus bancos.</div>';}
+
+// ===== SUSCRIPCIONES =====
+function renderSubs(){
+const ms=SUBS.filter(s=>P.subs.includes(s.id)),total=ms.reduce((a,s)=>a+s.price,0);
+document.getElementById('subList').innerHTML=`<div style="background:var(--accent-lighter);border:1.5px solid #b0cff0;border-radius:var(--r);padding:14px;margin-bottom:12px;text-align:center"><div style="font-size:.7em;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;font-weight:600">Total estimado mensual</div><div style="font-size:1.6em;font-weight:800;color:var(--accent);margin-top:2px">$${total.toLocaleString('es-AR')}</div><div style="font-size:.72em;color:var(--text2)">${ms.length} suscripciones activas</div></div>`+
+ms.map(s=>`<div class="sitem"><div class="sl">${logoImg(s.id,28)||`<span class="si-emoji">${s.i||'📌'}</span>`}<div><div class="sn">${s.n}</div><div class="sc">${s.cat}</div></div></div><div class="sp">${s.price?'$'+s.price.toLocaleString('es-AR')+'/mes':''}</div></div>`).join('');
+const tips=[];
+const streaming=ms.filter(s=>s.cat==='Streaming'),music=ms.filter(s=>s.cat==='Música'||s.cat==='Música/Video');
+if(streaming.length>=3){const savable=Math.round((streaming.length-2)*streaming.reduce((a,s)=>a+s.price,0)/streaming.length);tips.push({t:'g',txt:`Tenés <strong>${streaming.length} plataformas de streaming</strong> ($${streaming.reduce((a,s)=>a+s.price,0).toLocaleString('es-AR')}/mes). <strong>Estrategia de rotación:</strong> mantené las 2 que más uses y rotá las otras. Ahorro estimado: ~$${savable.toLocaleString('es-AR')}/mes.`})}
+if(music.length>=2){tips.push({t:'o',txt:`Tenés <strong>${music.length} servicios de música</strong> (${music.map(s=>s.n).join(', ')}). Elegí uno solo. Ahorro: ~$${music.slice(1).reduce((a,s)=>a+s.price,0).toLocaleString('es-AR')}/mes.`})}
+if(P.subs.includes('flow')&&(P.subs.includes('netflix')||P.subs.includes('disney'))){tips.push({t:'b',txt:'<strong>Flow</strong> puede incluir Disney+ o streaming en su pack. Chequeá si tu plan ya lo incluye antes de pagar aparte.'})}
+if(P.subs.includes('clublanacion')){tips.push({t:'g',txt:'<strong>Club La Nación</strong> ($6.900/mes) se paga solo si aprovechás los 2x1. Con 2 salidas por mes ya lo recuperás. Si no lo usás, cancelá y ahorrás $6.900/mes.'})}
+// Smart: recommend best card for each subscription
+const subCardTips=[];
+const subCards={
+'netflix':{banks:['galicia','mercadopago'],tip:'Galicia ofrece hasta 15% en streaming con Éminent. Mercado Pago a veces da cashback en débito automático.'},
+'disney':{banks:['galicia','mercadopago'],tip:'Galicia Éminent incluye Disney+ bonificado en algunos packs. Revisá tu pack.'},
+'spotify':{banks:['galicia','mercadopago'],tip:'Galicia bonifica Spotify en el paquete Éminent. Mercado Pago a veces ofrece descuento en servicios digitales.'},
+'flow':{banks:['provincia','nacion'],tip:'Cuenta DNI o BNA+ pueden tener reintegros puntuales en servicios de telecomunicaciones.'},
+'youtube':{banks:['mercadopago'],tip:'YouTube Premium conviene pagarlo con Mercado Pago si tenés cashback activo.'},
+'clublanacion':{banks:[],tip:'Club La Nación es un servicio de beneficios, no un streaming. Pagalo con cualquier tarjeta.'},
+};
+if(ms.length>=2&&P.banks.length>=2){
+let cardReco='<strong>Mejor tarjeta para cada suscripción:</strong><br>';
+let hasReco=false;
+ms.forEach(s=>{
+const sc=subCards[s.id];
+if(sc){
+const match=sc.banks.filter(b=>P.banks.includes(b));
+if(match.length){
+const bankName=BANKS.find(b=>b.id===match[0]);
+cardReco+=`${logoImg(s.id,14)} <strong>${s.n}</strong> → pagá con ${logoImg(match[0],14)} <strong>${bankName?bankName.n:match[0]}</strong><br><span style="font-size:.85em;color:var(--text3)">${sc.tip}</span><br>`;
+hasReco=true;
+}
+}
+});
+if(hasReco)tips.push({t:'b',txt:cardReco});
+}
+if(total>15000&&!subCardTips.length){tips.push({t:'o',txt:`<strong>Revisá con qué tarjeta pagás cada suscripción.</strong> Moviendo suscripciones a la tarjeta correcta podés ahorrar entre un 10-15%.`})}
+if(!tips.length)tips.push({t:'b',txt:'Agregá tus suscripciones para recibir recomendaciones de ahorro.'});
+document.getElementById('subTips').innerHTML=tips.map(t=>`<div class="stip stip-${t.t}">${t.txt}</div>`).join('');}
+
+// ===== PROFILE =====
+function renderProfile(){
+const mb=BANKS.filter(b=>P.banks.includes(b.id)),ms=SUBS.filter(s=>P.subs.includes(s.id)),msp=SUPERS.filter(s=>P.supers.includes(s.id));
+const session=localStorage.getItem('promos_session')||'';
+const isLogged=session&&session!=='_local_';
+
+document.getElementById('profUser').innerHTML=isLogged?`<div class="pcard" style="border-color:var(--accent)"><div class="pm"><strong>👤 Cuenta:</strong> ${session}${fbReady&&firebase.auth().currentUser?' (sincronizada en la nube)':' (local)'}</div></div>`:'<div class="pcard" style="border-color:var(--orange)"><div class="pm"><strong>👤 Sin cuenta</strong> — Tus datos solo están en este dispositivo. <a style="color:var(--accent);cursor:pointer;font-weight:700" onclick="doLogout()">Crear cuenta</a> para sincronizar.</div></div>';
+
+document.getElementById('profInfo').innerHTML=`
+<div class="pcard"><div class="pm"><strong>📍 Ubicación:</strong> ${P.city}${P.prov?', '+P.prov:''}${P.trav?' · 🚗 Viajero':''} · Nivel: ${myTier()}</div></div>
+<div class="pcard"><div class="pm"><strong>🏦 Bancos (${mb.length}):</strong> ${mb.map(b=>`<span style="display:inline-flex;align-items:center;gap:3px">${logoImg(b.id,14)}${b.n}</span>`).join(', ')||'Ninguno'}</div></div>
+<div class="pcard"><div class="pm"><strong>📺 Suscripciones (${ms.length}):</strong> ${ms.map(s=>`<span style="display:inline-flex;align-items:center;gap:3px">${logoImg(s.id,14)}${s.n}</span>`).join(', ')||'Ninguna'}</div></div>
+<div class="pcard"><div class="pm"><strong>🛒 Supermercados:</strong> ${msp.map(s=>s.n).join(', ')||'Ninguno'}</div></div>`;
+
+document.getElementById('logoutRow').classList.toggle('hidden',!isLogged);
+}
+
+// ===== INIT =====
+function init(){
+const session=localStorage.getItem('promos_session');
+if(session){
+P=loadLocal(session);
+if(P){
+document.getElementById('bnav').classList.add('on');
+navTo('s-dash',0);
+return;
+}
+}
+go('s-auth');
+}
+
+// Check Firebase auth state
+if(fbReady){
+firebase.auth().onAuthStateChanged(async user=>{
+if(user){
+fbUser=user;
+const cloud=await loadCloud(user.uid);
+if(cloud){
+P=cloud;
+saveLocal(user.email||user.uid,P);
+localStorage.setItem('promos_session',user.email||user.uid);
+document.getElementById('bnav').classList.add('on');
+navTo('s-dash',0);
+return;
+}
+}
+init();
+});
+}else{init()}
+
+// ===== SHARE & FEEDBACK =====
+const APP_URL='https://promos.agronasaja.com.ar';
+
+function shareApp(){
+const text=`🏷️ *Promos* — Sabé siempre con qué pagar\n\nLa app que te dice el mejor medio de pago para cada compra en Argentina. 62 promos de todos los bancos.\n\n📲 ${APP_URL}`;
+if(navigator.share){navigator.share({title:'Promos',text:text.replace(/\*/g,''),url:APP_URL}).catch(()=>{})}
+else{window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank')}
+}
+
+function shareCurrentPromo(){
+const mc=document.getElementById('mC');
+const h3=mc.querySelector('h3');
+const title=h3?h3.textContent:'una promo';
+const text=`🏷️ Mirá esta promo: *${title}*\n\nDescubrí más promos en Promos:\n📲 ${APP_URL}`;
+if(navigator.share){navigator.share({title:'Promos: '+title,text:text.replace(/\*/g,''),url:APP_URL}).catch(()=>{})}
+else{window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank')}
+}
+
+function openFeedback(){
+const mc=document.getElementById('mC');
+mc.innerHTML=`<h3>📣 Envianos tu feedback</h3>
+<div class="fg"><label>¿Qué querés reportar?</label>
+<select class="fi" id="fbType"><option>Promo incorrecta o vencida</option><option>Falta una promo</option><option>Bug / Error en la app</option><option>Sugerencia de mejora</option><option>Otro</option></select></div>
+<div class="fg"><label>Detalle</label><textarea class="fi" id="fbMsg" rows="4" placeholder="Contanos qué encontraste o qué te gustaría ver..." style="resize:vertical"></textarea></div>
+<button class="btn btn-p" onclick="sendFeedback()">Enviar feedback</button>`;
+document.getElementById('modal').classList.add('on');
+}
+
+function sendFeedback(){
+const type=document.getElementById('fbType').value;
+const msg=document.getElementById('fbMsg').value.trim();
+if(!msg){alert('Escribí algo para enviar');return}
+const body=encodeURIComponent('Tipo: '+type+'\nMensaje: '+msg+'\nUsuario: '+(localStorage.getItem('promos_session')||'anónimo')+'\nCiudad: '+(P?P.city:'—'));
+window.open('mailto:sanguine@agronasaja.com.ar?subject='+encodeURIComponent('Promos Feedback: '+type)+'&body='+body);
+document.getElementById('mC').innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:2em;margin-bottom:10px">✅</div><h3>¡Gracias por tu feedback!</h3><p style="color:var(--text2);font-size:.85em;margin-top:8px">Tu reporte nos ayuda a mantener las promos siempre actualizadas.</p></div>';
+}
+
+// ===== PWA INSTALL =====
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const btn=document.getElementById('installBtn');if(btn)btn.style.display='inline-flex'});
+function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{deferredPrompt=null;document.getElementById('installBtn').style.display='none'})}}
+
+// Service Worker registration
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
