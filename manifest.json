@@ -1,0 +1,20 @@
+{
+  "name": "Promos — Asistente de Promos Bancarias",
+  "short_name": "Promos",
+  "description": "Sabé siempre con qué pagar. El asistente inteligente de promos bancarias en Argentina.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#003a70",
+  "orientation": "portrait",
+  "categories": ["finance", "shopping"],
+  "lang": "es-AR",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%23003a70' width='512' height='512' rx='100'/%3E%3Ctext x='256' y='340' text-anchor='middle' font-size='260' fill='white'%3E\ud83c\udff7\ufe0f%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
