@@ -356,7 +356,9 @@ Continuar con Google
 // TODO: Replace with your Firebase project config
 const FIREBASE_CONFIG={apiKey:"AIzaSyDemo",authDomain:"mipago-app.firebaseapp.com",projectId:"mipago-app",storageBucket:"mipago-app.appspot.com",messagingSenderId:"000000000",appId:"1:000000000:web:000000000"};
 let fbReady=false,fbUser=null,db=null;
+if(FIREBASE_CONFIG.apiKey&&!FIREBASE_CONFIG.apiKey.includes('Demo')&&FIREBASE_CONFIG.projectId!=='mipago-app'){
 try{firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();fbReady=true}catch(e){console.log('Firebase not configured, using local mode')}
+}else{console.log('Firebase placeholder config detected, using local mode')}
 
 // ===== LOGO URLS (clearbit + fallbacks) =====
 const LOGOS={
